@@ -26,6 +26,13 @@
 		<tag/>
 		<url/>
 	</scm>
+	<distributionManagement>
+      <repository>
+        <id>github</id>
+        <name>GitHub Packages</name>
+        <url>https://maven.pkg.github.com/ShaftHQ/SHAFT_MCP</url>
+      </repository>
+    </distributionManagement>
 	<properties>
         <commandToPackage>mvn clean package -DskipTests</commandToPackage>
         <commandToTest>mvn clean test</commandToTest>
