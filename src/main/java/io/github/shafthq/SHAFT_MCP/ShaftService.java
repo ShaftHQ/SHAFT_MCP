@@ -1,7 +1,8 @@
 package io.github.shafthq.SHAFT_MCP;
 
-import com.shaft.driver.DriverFactory;
 import com.shaft.driver.SHAFT;
+import com.shaft.listeners.TestNGListener;
+import com.shaft.tools.io.internal.ProjectStructureManager;
 import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ public class ShaftService {
     @Tool(name = "driver_initialize", description = "launches browser")
     public void initializeDriver(BrowserType targetBrowser) {
         try{
+            TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
             SHAFT.Properties.web.set().targetBrowserName(targetBrowser.name());
             driver  = new SHAFT.GUI.WebDriver();
             logger.info("Driver initialized: {}", driver);
