@@ -27,6 +27,8 @@
 		<url/>
 	</scm>
 	<properties>
+        <commandToPackage>mvn clean package -DskipTests</commandToPackage>
+        <commandToTest>mvn clean test</commandToTest>
 		<java.version>21</java.version>
 		<spring-ai.version>1.0.1</spring-ai.version>
 		<!-- Make sure you point to the latest release version: https://github.com/ShaftHQ/SHAFT_ENGINE/releases -->

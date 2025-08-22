@@ -48,13 +48,14 @@ public class ShaftService {
     // Browser Management Tools
     @Tool(name = "driver_initialize", description = "launches browser")
     public void initializeDriver(BrowserType targetBrowser) {
-        driver  = switch (targetBrowser){
-            case CHROME -> new SHAFT.GUI.WebDriver(DriverFactory.DriverType.CHROME);
-            case FIREFOX ->new SHAFT.GUI.WebDriver(DriverFactory.DriverType.FIREFOX);
-            case SAFARI ->  new SHAFT.GUI.WebDriver(DriverFactory.DriverType.SAFARI);
-            case EDGE -> new SHAFT.GUI.WebDriver(DriverFactory.DriverType.EDGE);
-        };
-        logger.info("Driver initialized: {}", driver);
+        try{
+            SHAFT.Properties.web.set().targetBrowserName(targetBrowser.name());
+            driver  = new SHAFT.GUI.WebDriver();
+            logger.info("Driver initialized: {}", driver);
+        } catch (Exception e) {
+            logger.error("Failed to initialize driver.", e);
+            throw e;
+        }
     }
 
     @Tool(name = "driver_quit", description = "closes browser")
