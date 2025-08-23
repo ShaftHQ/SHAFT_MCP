@@ -11,11 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ShaftService {
-
     private static final Logger logger = LoggerFactory.getLogger(ShaftService.class);
     SHAFT.GUI.WebDriver driver;
-
-    // Helper functions
     SHAFT.GUI.WebDriver getDriver (){
         if (driver == null) {
             logger.error("No active browser session found. Please initialize a browser session first.");
@@ -23,7 +20,6 @@ public class ShaftService {
         }
         return driver;
     }
-
     By getLocator(locatorStrategy locatorStrategy, String locatorValue) {
         return switch (locatorStrategy) {
             case ID -> By.id(locatorValue);
@@ -34,18 +30,15 @@ public class ShaftService {
             case CLASSNAME -> By.className(locatorValue);
         };
     }
-
     public enum locatorStrategy {
         ID,CSSSELECTOR,CSS,SELECTOR,XPATH,NAME,TAGNAME,CLASSNAME
     }
-
     public enum BrowserType {
         CHROME,
         FIREFOX,
         SAFARI,
         EDGE
     }
-
     /**
      * Initializes the WebDriver for the specified browser type.
      * @param targetBrowser The type of browser to initialize (e.g., CHROME, FIREFOX).
@@ -62,7 +55,6 @@ public class ShaftService {
             throw e;
         }
     }
-
     /**
      * Quits the WebDriver, closing all associated browser windows.
      */
@@ -76,7 +68,6 @@ public class ShaftService {
             throw e;
         }
     }
-
     /**
      * Navigates the browser to the specified URL.
      * @param targetUrl The URL to navigate to.
@@ -92,8 +83,6 @@ public class ShaftService {
             throw e;
         }
     }
-
-
     /**
      * Clicks on an element identified by the specified locator strategy and value.
      * @param locatorStrategy The strategy to locate the element (e.g., ID, XPATH).
@@ -111,7 +100,6 @@ public class ShaftService {
             throw e;
         }
     }
-
     /**
      * Types the specified text into an element identified by the given locator strategy and value.
      * @param locatorStrategy The strategy to locate the element (e.g., ID, XPATH).

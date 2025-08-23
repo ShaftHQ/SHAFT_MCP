@@ -90,9 +90,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>io.github.shafthq.SHAFT_MCP.ShaftMcpApplication</mainClass>
-                </configuration>
 			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -106,7 +103,7 @@
                         </manifest>
                     </archive>
                     <includes>
-                        <include>com/**/*</include>
+                        <include>io/**/*</include>
                         <include>resources/**/*</include>
                     </includes>
                 </configuration>
@@ -116,10 +113,6 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.11.3</version>
                 <configuration>
-                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
-                    <sourcepath>
-                        ${project.basedir}/src/main/java;${project.basedir}/target/generated-sources/annotations
-                    </sourcepath>
                     <encoding>UTF-8</encoding>
                     <failOnError>false</failOnError>
                     <show>public</show>
@@ -143,7 +136,6 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <!--                        <phase>verify</phase>-->
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>

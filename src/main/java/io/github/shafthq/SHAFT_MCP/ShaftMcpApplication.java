@@ -28,5 +28,4 @@ public class ShaftMcpApplication {
 	public List<ToolCallback> shaftTools(ShaftService shaftService) {
 		return List.of(ToolCallbacks.from(shaftService));
 	}
-
 }
