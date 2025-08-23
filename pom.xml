@@ -91,7 +91,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <executable>true</executable>
                     <mainClass>io.github.shafthq.SHAFT_MCP.ShaftMcpApplication</mainClass>
                 </configuration>
 			</plugin>
