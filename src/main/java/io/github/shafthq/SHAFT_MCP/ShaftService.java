@@ -46,7 +46,10 @@ public class ShaftService {
         EDGE
     }
 
-    // Browser Management Tools
+    /**
+     * Initializes the WebDriver for the specified browser type.
+     * @param targetBrowser The type of browser to initialize (e.g., CHROME, FIREFOX).
+     */
     @Tool(name = "driver_initialize", description = "launches browser")
     public void initializeDriver(BrowserType targetBrowser) {
         try{
@@ -60,6 +63,9 @@ public class ShaftService {
         }
     }
 
+    /**
+     * Quits the WebDriver, closing all associated browser windows.
+     */
     @Tool(name = "driver_quit", description = "closes browser")
     public void quitDriver() {
         try{
@@ -71,6 +77,10 @@ public class ShaftService {
         }
     }
 
+    /**
+     * Navigates the browser to the specified URL.
+     * @param targetUrl The URL to navigate to.
+     */
     @Tool(name = "browser_navigate", description = "navigates to a URL")
     public void navigate(String targetUrl) {
         try{
@@ -84,7 +94,11 @@ public class ShaftService {
     }
 
 
-    // Element Interaction Tools
+    /**
+     * Clicks on an element identified by the specified locator strategy and value.
+     * @param locatorStrategy The strategy to locate the element (e.g., ID, XPATH).
+     * @param locatorValue The value used with the locator strategy to find the element.
+     */
     @Tool(name = "element_click", description = "clicks an element")
     public void click(locatorStrategy locatorStrategy, String locatorValue) {
         try{
@@ -98,6 +112,12 @@ public class ShaftService {
         }
     }
 
+    /**
+     * Types the specified text into an element identified by the given locator strategy and value.
+     * @param locatorStrategy The strategy to locate the element (e.g., ID, XPATH).
+     * @param locatorValue The value used with the locator strategy to find the element.
+     * @param textValue The text to type into the element.
+     */
     @Tool(name = "element_type", description = "types value to an element")
     public void type(locatorStrategy locatorStrategy, String locatorValue, CharSequence... textValue) {
         try{
@@ -110,6 +130,4 @@ public class ShaftService {
             throw e;
         }
     }
-
-
 }
