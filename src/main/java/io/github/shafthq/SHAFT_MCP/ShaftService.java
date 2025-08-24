@@ -91,28 +91,6 @@ public class ShaftService {
     }
 
     /**
-     * Find all elements matching the specified locator strategy and value.
-     * This is a support method for the AI agent to better explore the page.
-     *
-     * @param locatorStrategy The strategy to locate the elements (e.g., ID, XPATH).
-     * @param locatorValue    The value used with the locator strategy to find the elements.
-     * @return A list of web elements that match the specified locator criteria.
-     */
-    @Tool(name = "element_find_all", description = "finds all elements matching the locator")
-    public List<WebElement> findAll(locatorStrategy locatorStrategy, String locatorValue) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            By locator = getLocator(locatorStrategy, locatorValue);
-            var foundElements = driver.getDriver().findElements(locator);
-            logger.info("Found {} elements with locator: {} - {}", foundElements.size(), locatorStrategy, locatorValue);
-            return foundElements;
-        } catch (Exception e) {
-            logger.error("Failed to find elements with locator: {} - {}", locatorStrategy, locatorValue, e);
-            throw e;
-        }
-    }
-
-    /**
      * Get the source code of the current page.
      * This is a support method for the AI agent to better explore the page.
      * @return The HTML source code of the current page as a string.
@@ -126,25 +104,6 @@ public class ShaftService {
             return pageSource;
         } catch (Exception e) {
             logger.error("Failed to retrieve page source.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Captures a screenshot of the current browser window and returns it for evaluation.
-     * This is a support method for the AI agent to better explore the page.
-     * This is useful for capturing the state of the application
-     * at specific points during the test execution.
-     */
-    @Tool(name = "browser_take_screenshot", description = "takes a screenshot")
-    public byte[] takeScreenshot() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            byte[] screenshot = ((TakesScreenshot) driver.getDriver()).getScreenshotAs(OutputType.BYTES);
-            logger.info("Screenshot captured successfully.");
-            return screenshot;
-        } catch (Exception e) {
-            logger.error("Failed to capture screenshot.", e);
             throw e;
         }
     }
