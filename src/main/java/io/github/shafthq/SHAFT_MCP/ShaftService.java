@@ -5,6 +5,8 @@ import com.shaft.listeners.TestNGListener;
 import com.shaft.tools.io.internal.AllureManager;
 import com.shaft.tools.io.internal.ProjectStructureManager;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
@@ -649,20 +651,19 @@ public class ShaftService {
     }
 
     /**
-     * Captures a screenshot of the current browser window and attaches it to the execution report.
-     * This method takes a screenshot of the visible area of the browser window and saves it
-     * to a predefined location. The screenshot is then attached to the execution report for
-     * documentation and analysis purposes. This is useful for capturing the state of the application
+     * Captures a screenshot of the current browser window and returns it for evaluation.
+     * This is useful for capturing the state of the application
      * at specific points during the test execution.
      */
-    @Tool(name = "browser_take_screenshot", description = "takes a screenshot and attaches it to the report")
-    public void takeScreenshot() {
+    @Tool(name = "browser_take_screenshot", description = "takes a screenshot")
+    public byte[] takeScreenshot() {
         try {
             SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().captureScreenshot();
-            logger.info("Screenshot taken and attached to the report.");
+            byte[] screenshot = ((TakesScreenshot) driver.getDriver()).getScreenshotAs(OutputType.BYTES);
+            logger.info("Screenshot captured successfully.");
+            return screenshot;
         } catch (Exception e) {
-            logger.error("Failed to take screenshot.", e);
+            logger.error("Failed to capture screenshot.", e);
             throw e;
         }
     }
