@@ -5,15 +5,10 @@ import com.shaft.listeners.TestNGListener;
 import com.shaft.tools.io.internal.AllureManager;
 import com.shaft.tools.io.internal.ProjectStructureManager;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ShaftService {
