@@ -2,7 +2,7 @@
 - close any open claude desktop app instance.
 - run the following command in your terminal:
 ```bash
-mvn clean package -DskipTests
+mvn clean package "-DskipTests" "-Dgpg.skip"
 ```
 
 # To test
@@ -40,7 +40,7 @@ mvn clean test
       "command": "java",
       "args": [
         "-jar",
-        "C:\\Users\\Mohab\\IdeaProjects\\SHAFT_MCP\\target\\SHAFT_MCP-9.3.20250823.jar"
+        "C:\\Users\\Mohab\\IdeaProjects\\SHAFT_MCP\\target\\SHAFT_MCP-9.3.20250824.jar"
       ]
     }
   }

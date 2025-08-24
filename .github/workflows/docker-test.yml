@@ -1,9 +1,9 @@
 name: Test Docker Image
 
 on:
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
+  schedule:
+    - cron: '00 1 * * *'
 
 jobs:
   build-and-test:
