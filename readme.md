@@ -2,7 +2,7 @@
 - close any open claude desktop app instance.
 - run the following command in your terminal:
 ```bash
-mvn clean package -DskipTests
+mvn clean package "-DskipTests" "-Dgpg.skip"
 ```
 
 # To test
