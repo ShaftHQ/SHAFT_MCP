@@ -26,31 +26,27 @@ mvn clean test
         "@jetbrains/mcp-proxy"
       ]
     },
-    "shaft-mcp": {
-      "command": "java",
-      "args": [
-        "-jar",
-        "C:\\Users\\Mohab\\IdeaProjects\\SHAFT_MCP\\target\\SHAFT_MCP-9.3.20250814.jar"
-      ]
-    },
     "github": {
-      "command": "docker",
+      "command": "npx",
       "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "ghcr.io/github/github-mcp-server"
+        "-y",
+        "@modelcontextprotocol/server-github"
       ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
+    },
+    "shaft-mcp": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "C:\\Users\\Mohab\\IdeaProjects\\SHAFT_MCP\\target\\SHAFT_MCP-9.3.20250823.jar"
+      ]
     }
   }
 }
 ```
-- don't forget to replace `SHAFT_MCP-9.3.20250814` with the latest version.
+- don't forget to replace `SHAFT_MCP-9.3.20250823` with the latest version.
 - don't forget to replace `${GITHUB_PERSONAL_ACCESS_TOKEN}` with your actual GitHub token.
 
 # To run
