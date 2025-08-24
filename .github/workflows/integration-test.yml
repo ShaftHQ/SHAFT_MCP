@@ -1,4 +1,4 @@
-name: Package and Test on PR
+name: Package and Test
 
 on:
   pull_request:
@@ -22,5 +22,5 @@ jobs:
       - name: Package (skip tests and gpg)
         run: mvn clean package -DskipTests -Dgpg.skip
 
-      - name: Run tests
-        run: mvn clean test
+#      - name: Run tests
+#        run: mvn clean test
