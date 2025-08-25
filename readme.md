@@ -1,4 +1,18 @@
-# SHAFT MCP Server Setup Guide
+<h1>
+<picture>
+  <!-- User prefers light mode: -->
+  <source srcset="https://github.com/user-attachments/assets/b2e8454d-97ed-4dd8-91f2-1c09c53ba94e" media="(prefers-color-scheme: light)" width="40"/>
+
+  <!-- User prefers dark mode: -->
+  <source srcset="https://github.com/user-attachments/assets/9cb4a7a8-2de7-486c-adb1-ad254af8c58b"  media="(prefers-color-scheme: dark)" width="40"/>
+
+  <!-- User has no color preference: -->
+  <img src="https://github.com/user-attachments/assets/016ebb3c-4090-4f07-a9b3-830fdf4cb696"/>
+</picture> SHAFT MCP Server Setup Guide
+</h1>
+
+<img width="1280" height="720" alt="New Project" src="https://github.com/user-attachments/assets/cda129a7-592b-4e82-8294-dbed364d0e2d" />
+
 
 ## What is SHAFT MCP?
 
