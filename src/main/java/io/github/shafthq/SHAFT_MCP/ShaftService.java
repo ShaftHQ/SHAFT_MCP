@@ -25,12 +25,12 @@ public class ShaftService {
 
     By getLocator(locatorStrategy locatorStrategy, String locatorValue) {
         return switch (locatorStrategy) {
-            case ID -> By.id(locatorValue);
+            case ID -> SHAFT.GUI.Locator.hasAnyTagName().hasId(locatorValue).build();
             case CSSSELECTOR, CSS, SELECTOR -> By.cssSelector(locatorValue);
             case XPATH -> By.xpath(locatorValue);
-            case NAME -> By.name(locatorValue);
-            case TAGNAME -> By.tagName(locatorValue);
-            case CLASSNAME -> By.className(locatorValue);
+            case NAME -> SHAFT.GUI.Locator.hasAnyTagName().hasAttribute("name", locatorValue).build();
+            case TAGNAME -> SHAFT.GUI.Locator.hasTagName(locatorValue).build();
+            case CLASSNAME -> SHAFT.GUI.Locator.hasAnyTagName().hasAttribute("class", locatorValue).build();
         };
     }
 
