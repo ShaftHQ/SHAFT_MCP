@@ -60,7 +60,7 @@ jobs:
         if: steps.check_sync.outputs.sync_needed == 'true'
         run: |
           # Update project version to match SHAFT Engine version
-          sed -i "s|<version>$CURRENT_PROJECT_VERSION</version> <!-- Update this version|<version>$SHAFT_ENGINE_VERSION</version> <!-- Update this version|g" pom.xml
+          sed -i "s|<version>$CURRENT_PROJECT_VERSION</version>|<version>$SHAFT_ENGINE_VERSION</version>|g" pom.xml
           echo "Updated pom.xml project version to $SHAFT_ENGINE_VERSION"
           
       - name: Update version in Dockerfile
