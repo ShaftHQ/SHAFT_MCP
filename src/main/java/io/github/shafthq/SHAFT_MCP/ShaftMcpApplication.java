@@ -22,11 +22,19 @@ public class ShaftMcpApplication {
 
     /**
      * Registers the ShaftService tool callbacks.
-     * @param shaftService the ShaftService instance
+     * @param engineService the ShaftService instance
      * @return a list of ToolCallback instances
      */
 	@Bean
-	public List<ToolCallback> shaftTools(ShaftService shaftService) {
-		return List.of(ToolCallbacks.from(shaftService));
+	public List<ToolCallback> shaftTools(EngineService engineService, BrowserService browserService, ElementService elementService) {
+        var engineServiceList = List.of(ToolCallbacks.from(engineService));
+        var browserServiceList = List.of(ToolCallbacks.from(browserService));
+        var elementServiceList = List.of(ToolCallbacks.from(elementService));
+
+        var serviceList = new java.util.ArrayList<ToolCallback>();
+        serviceList.addAll(engineServiceList);
+        serviceList.addAll(browserServiceList);
+        serviceList.addAll(elementServiceList);
+        return serviceList;
 	}
 }

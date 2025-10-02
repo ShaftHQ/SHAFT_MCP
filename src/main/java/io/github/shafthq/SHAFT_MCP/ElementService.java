@@ -1,107 +1,18 @@
 package io.github.shafthq.SHAFT_MCP;
 
 import com.shaft.driver.SHAFT;
-import com.shaft.listeners.TestNGListener;
-import com.shaft.tools.io.internal.AllureManager;
-import com.shaft.tools.io.internal.ProjectStructureManager;
 import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
+import static io.github.shafthq.SHAFT_MCP.EngineService.getDriver;
+import static io.github.shafthq.SHAFT_MCP.EngineService.getLocator;
+
 @Service
-public class ShaftService {
-    private static final Logger logger = LoggerFactory.getLogger(ShaftService.class);
-    SHAFT.GUI.WebDriver driver;
-
-    SHAFT.GUI.WebDriver getDriver() {
-        if (driver == null) {
-            logger.error("No active browser session found. Please initialize a browser session first.");
-            throw new IllegalStateException("No active browser session");
-        }
-        return driver;
-    }
-
-    By getLocator(locatorStrategy locatorStrategy, String locatorValue) {
-        return switch (locatorStrategy) {
-            case ID -> SHAFT.GUI.Locator.hasAnyTagName().hasId(locatorValue).build();
-            case CSSSELECTOR, CSS, SELECTOR -> By.cssSelector(locatorValue);
-            case XPATH -> By.xpath(locatorValue);
-            case NAME -> SHAFT.GUI.Locator.hasAnyTagName().hasAttribute("name", locatorValue).build();
-            case TAGNAME -> SHAFT.GUI.Locator.hasTagName(locatorValue).build();
-            case CLASSNAME -> SHAFT.GUI.Locator.hasAnyTagName().hasAttribute("class", locatorValue).build();
-        };
-    }
-
-    /**
-     * Initializes the WebDriver for the specified browser type.
-     *
-     * @param targetBrowser The type of browser to initialize (e.g., CHROME, FIREFOX).
-     */
-    @Tool(name = "driver_initialize", description = "launches browser")
-    public void initializeDriver(BrowserType targetBrowser) {
-        try {
-            TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
-            SHAFT.Properties.web.set().targetBrowserName(targetBrowser.name());
-            driver = new SHAFT.GUI.WebDriver();
-            logger.info("Driver initialized: {}", driver);
-        } catch (Exception e) {
-            logger.error("Failed to initialize driver.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Quits the WebDriver, closing all associated browser windows.
-     */
-    @Tool(name = "driver_quit", description = "closes browser")
-    public void quitDriver() {
-        try {
-            logger.info("Driver {} will be closed", driver);
-            driver.quit();
-        } catch (Exception e) {
-            logger.error("Failed to close driver.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Generate a test report for the current session.
-     * This method compiles and generates a detailed test report based on the actions performed during the session.
-     * It utilizes SHAFT's reporting capabilities to create a comprehensive report that includes
-     * information such as test steps, outcomes, screenshots, and logs.
-     * The generated report is saved in a predefined location for easy access and review.
-     * This method should be called at the end of the test session to ensure all actions are documented.
-     */
-    @Tool(name = "generate_test_report", description = "generates a test report for the current session")
-    public void generateTestReport() {
-        try {
-            AllureManager.openAllureReportAfterExecution();
-            logger.info("Test report generated successfully.");
-        } catch (Exception e) {
-            logger.error("Failed to generate test report.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Get the source code of the current page.
-     * This is a support method for the AI agent to better explore the page.
-     * @return The HTML source code of the current page as a string.
-     */
-    @Tool(name = "browser_get_page_source", description = "gets the source code of the current page")
-    public String getPageSource() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            String pageSource = driver.browser().getPageSource();
-            logger.info("Retrieved page source successfully.");
-            return pageSource;
-        } catch (Exception e) {
-            logger.error("Failed to retrieve page source.", e);
-            throw e;
-        }
-    }
+public class ElementService {
+    private static final Logger logger = LoggerFactory.getLogger(ElementService.class);
 
     /**
      * Hovers over an element identified by the specified locator strategy and value.
@@ -144,7 +55,8 @@ public class ShaftService {
     /**
      * Clicks on an element identified by the specified name using Artificial Intelligence.
      *
-     * @param elementName The name of the element to click, as recognized by AI.
+     * @param elementName The name of the element to click, this is the visible text of the element. Some elements have placeholder, other element have title text written in a label above or next to them.
+     *                    For example, to click on a button with text "Submit", you would use "Submit" as the element name.
      */
     @Tool(name = "element_click_ai", description = "clicks an element using AI")
     public void clickUsingAI(String elementName) {
@@ -258,7 +170,8 @@ public class ShaftService {
     /**
      * Types the specified text into an element identified by the given name using Artificial Intelligence.
      *
-     * @param elementName The name of the element to type into, as recognized by AI.
+     * @param elementName The name of the element to click, this is the visible text of the element. Some elements have placeholder, other element have title text written in a label above or next to them.
+     *                    For example, to type into a text field with label or placeholder text, or next to or below a div with this text "Username", you would use "Username" as the element name.
      * @param textValue   The text to type into the element.
      */
     @Tool(name = "element_type_ai", description = "types value to an element using AI")
@@ -535,270 +448,4 @@ public class ShaftService {
             throw e;
         }
     }
-
-    /**
-     * Navigates the browser to the specified URL.
-     *
-     * @param targetUrl The URL to navigate to.
-     */
-    @Tool(name = "browser_navigate", description = "navigates to a URL")
-    public void navigate(String targetUrl) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().navigateToURL(targetUrl);
-            logger.info("Navigated to URL: {}", targetUrl);
-        } catch (Exception e) {
-            logger.error("Failed to navigate to URL: {}", targetUrl, e);
-            throw e;
-        }
-    }
-
-    /**
-     * Navigates the browser to the specified URL using Basic Authentication.
-     *
-     * @param targetUrl          The URL to navigate to.
-     * @param username           The username for Basic Authentication.
-     * @param password           The password for Basic Authentication.
-     * @param targetUrlAfterAuth The URL to navigate to after authentication.
-     */
-    @Tool(name = "browser_navigate_with_basic_auth", description = "navigates to a URL with Basic Authentication")
-    public void navigateWithBasicAuth(String targetUrl, String username, String password, String targetUrlAfterAuth) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().navigateToURLWithBasicAuthentication(targetUrl, username, password, targetUrlAfterAuth);
-            logger.info("Navigated to URL with Basic Authentication: {}", targetUrl);
-        } catch (Exception e) {
-            logger.error("Failed to navigate to URL with Basic Authentication: {}", targetUrl, e);
-            throw e;
-        }
-    }
-
-    /**
-     * Refreshes the current page in the browser.
-     */
-    @Tool(name = "browser_refresh", description = "refreshes the current page")
-    public void refreshPage() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().refreshCurrentPage();
-            logger.info("Page refreshed successfully.");
-        } catch (Exception e) {
-            logger.error("Failed to refresh the page.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Navigates back to the previous page in the browser's history.
-     */
-    @Tool(name = "browser_navigate_back", description = "navigates back to the previous page")
-    public void navigateBack() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().navigateBack();
-            logger.info("Navigated back to the previous page.");
-        } catch (Exception e) {
-            logger.error("Failed to navigate back.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Navigates forward to the next page in the browser's history.
-     */
-    @Tool(name = "browser_navigate_forward", description = "navigates forward to the next page")
-    public void navigateForward() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().navigateForward();
-            logger.info("Navigated forward to the next page.");
-        } catch (Exception e) {
-            logger.error("Failed to navigate forward.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Maximizes the browser window.
-     */
-    @Tool(name = "browser_maximize_window", description = "maximizes the browser window")
-    public void maximizeWindow() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().maximizeWindow();
-            logger.info("Browser window maximized.");
-        } catch (Exception e) {
-            logger.error("Failed to maximize browser window.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Sets the browser window to a specific size.
-     *
-     * @param width  The desired width of the browser window.
-     * @param height The desired height of the browser window.
-     */
-    @Tool(name = "browser_set_window_size", description = "sets the browser window to a specific size")
-    public void setWindowSize(int width, int height) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().setWindowSize(width, height);
-            logger.info("Browser window size set to {}x{}.", width, height);
-        } catch (Exception e) {
-            logger.error("Failed to set browser window size to {}x{}.", width, height, e);
-            throw e;
-        }
-    }
-
-    /**
-     * Sets the browser window to fullscreen mode.
-     */
-    @Tool(name = "browser_fullscreen_window", description = "sets the browser window to fullscreen mode")
-    public void fullscreenWindow() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().fullScreenWindow();
-            logger.info("Browser window set to fullscreen mode.");
-        } catch (Exception e) {
-            logger.error("Failed to set browser window to fullscreen mode.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Deletes all cookies in the current browser session.
-     */
-    @Tool(name = "browser_delete_all_cookies", description = "deletes all cookies")
-    public void deleteAllCookies() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().deleteAllCookies();
-            logger.info("All cookies deleted.");
-        } catch (Exception e) {
-            logger.error("Failed to delete all cookies.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Deletes a specific cookie by name in the current browser session.
-     *
-     * @param cookieName The name of the cookie to delete.
-     */
-    @Tool(name = "browser_delete_cookie", description = "deletes a specific cookie by name")
-    public void deleteCookie(String cookieName) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().deleteCookie(cookieName);
-            logger.info("Cookie '{}' deleted.", cookieName);
-        } catch (Exception e) {
-            logger.error("Failed to delete cookie '{}'.", cookieName, e);
-            throw e;
-        }
-    }
-
-    /**
-     * Adds a cookie to the current browser session.
-     *
-     * @param name  The name of the cookie.
-     * @param value The value of the cookie.
-     */
-    @Tool(name = "browser_add_cookie", description = "adds a cookie")
-    public void addCookie(String name, String value) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            driver.browser().addCookie(name, value);
-            logger.info("Cookie added: {}={}", name, value);
-        } catch (Exception e) {
-            logger.error("Failed to add cookie: {}={}", name, value, e);
-            throw e;
-        }
-    }
-
-    /**
-     * Retrieves a cookie by name from the current browser session.
-     *
-     * @param cookieName The name of the cookie to retrieve.
-     * @return The cookie value as a string, or null if not found.
-     */
-    @Tool(name = "browser_get_cookie", description = "gets a cookie by name")
-    public String getCookie(String cookieName) {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            String cookieValue = driver.browser().getCookie(cookieName).getValue();
-            logger.info("Retrieved cookie: {}={}", cookieName, cookieValue);
-            return cookieValue;
-        } catch (Exception e) {
-            logger.error("Failed to retrieve cookie '{}'.", cookieName, e);
-            throw e;
-        }
-    }
-
-    /**
-     * Retrieves all cookies from the current browser session.
-     *
-     * @return A string representation of all cookies.
-     */
-    @Tool(name = "browser_get_all_cookies", description = "gets all cookies")
-    public String getAllCookies() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            String allCookies = driver.browser().getAllCookies().toString();
-            logger.info("Retrieved all cookies: {}", allCookies);
-            return allCookies;
-        } catch (Exception e) {
-            logger.error("Failed to retrieve all cookies.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Retrieves the current URL of the browser.
-     *
-     * @return The current URL as a string.
-     */
-    @Tool(name = "browser_get_current_url", description = "gets current URL")
-    public String getCurrentUrl() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            String currentUrl = driver.browser().getCurrentURL();
-            logger.info("Current URL retrieved: {}", currentUrl);
-            return currentUrl;
-        } catch (Exception e) {
-            logger.error("Failed to retrieve current URL.", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Retrieves the title of the current page in the browser.
-     *
-     * @return The page title as a string.
-     */
-    @Tool(name = "browser_get_title", description = "gets current page title")
-    public String getTitle() {
-        try {
-            SHAFT.GUI.WebDriver driver = getDriver();
-            String title = driver.browser().getCurrentWindowTitle();
-            logger.info("Page title retrieved: {}", title);
-            return title;
-        } catch (Exception e) {
-            logger.error("Failed to retrieve page title.", e);
-            throw e;
-        }
-    }
-
-    public enum locatorStrategy {
-        ID, CSSSELECTOR, CSS, SELECTOR, XPATH, NAME, TAGNAME, CLASSNAME
-    }
-
-    public enum BrowserType {
-        CHROME,
-        FIREFOX,
-        SAFARI,
-        EDGE
-    }
-
-
 }
