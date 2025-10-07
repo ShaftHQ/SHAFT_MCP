@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -94,12 +95,16 @@ jobs:
           echo "=== Checking for old version references ==="
           grep -n "$CURRENT_PROJECT_VERSION" pom.xml Dockerfile src/main/resources/application.properties readme.md || echo "No old version references found (expected)"
           
-      - name: Commit and push changes
+      - name: Create PR with version sync changes
         if: steps.check_sync.outputs.sync_needed == 'true'
         run: |
           # Configure git
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Create a new branch for the changes
+          BRANCH_NAME="sync-versions-to-$SHAFT_ENGINE_VERSION"
+          git checkout -b "$BRANCH_NAME"
           
           # Stage changes
           git add pom.xml Dockerfile src/main/resources/application.properties readme.md
@@ -113,21 +118,46 @@ jobs:
 
             - Updated project version in pom.xml
             - Updated Dockerfile Maven Central URL
-            - Updated application.properties MCP server version  
+            - Updated application.properties MCP server version
             - Updated readme.md version references
             
             This automated update keeps all version references in sync with the SHAFT Engine version."
             
-            # Push changes
-            git push
-            echo "Changes committed and pushed successfully"
+            # Push changes to the new branch
+            git push origin "$BRANCH_NAME"
+            echo "Changes committed and pushed to branch $BRANCH_NAME"
+            
+            # Create a pull request using GitHub CLI
+            PR_BODY="## Version Sync Update
+
+            This automated PR syncs the project version with the SHAFT Engine version.
+
+            ### Changes
+            - ✅ Updated project version in \`pom.xml\` from \`$CURRENT_PROJECT_VERSION\` to \`$SHAFT_ENGINE_VERSION\`
+            - ✅ Updated Dockerfile Maven Central URL
+            - ✅ Updated \`application.properties\` MCP server version
+            - ✅ Updated \`readme.md\` version references
+
+            ### Review
+            Please review and merge this PR to complete the version sync process."
+            
+            gh pr create \
+              --title "🔄 Auto-sync project version to $SHAFT_ENGINE_VERSION" \
+              --body "$PR_BODY" \
+              --base main \
+              --head "$BRANCH_NAME"
+            
+            echo "Pull request created successfully"
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Create summary
         run: |
           if [ "${{ steps.check_sync.outputs.sync_needed }}" == "true" ]; then
-            echo "✅ **Version Sync Completed**" >> $GITHUB_STEP_SUMMARY
-            echo "- Project version updated from \`$CURRENT_PROJECT_VERSION\` to \`$SHAFT_ENGINE_VERSION\`" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Version Sync PR Created**" >> $GITHUB_STEP_SUMMARY
+            echo "- Project version will be updated from \`$CURRENT_PROJECT_VERSION\` to \`$SHAFT_ENGINE_VERSION\`" >> $GITHUB_STEP_SUMMARY
+            echo "- A pull request has been created for review and merge" >> $GITHUB_STEP_SUMMARY
             echo "- Updated files: pom.xml, Dockerfile, application.properties, readme.md" >> $GITHUB_STEP_SUMMARY
           else
             echo "ℹ️ **No Sync Needed**" >> $GITHUB_STEP_SUMMARY
