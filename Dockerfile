@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jre
 
 # Download the released JAR from Maven Central
-ADD https://repo1.maven.org/maven2/io/github/shafthq/SHAFT_MCP/9.4.20251007/SHAFT_MCP-9.4.20251007.jar /app/SHAFT_MCP.jar
+ADD https://repo1.maven.org/maven2/io/github/shafthq/SHAFT_MCP/9.4.20251022/SHAFT_MCP-9.4.20251022.jar /app/SHAFT_MCP.jar
 
 WORKDIR /app
 
