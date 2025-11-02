@@ -21,6 +21,25 @@ class EngineServiceTest {
     private EngineService engineService;
 
     /**
+     * Recursively deletes a directory and all its contents.
+     * 
+     * @param directory The directory to delete
+     */
+    private void deleteDirectoryRecursively(File directory) {
+        if (directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectoryRecursively(file);
+                }
+            }
+        }
+        if (!directory.delete()) {
+            logger.warn("Failed to delete: {}", directory.getAbsolutePath());
+        }
+    }
+
+    /**
      * Tests that allure-results directory is created during initialization.
      * This verifies the fix for the Allure results directory warning issue.
      */
@@ -35,7 +54,8 @@ class EngineServiceTest {
         // Clean up if it exists from previous runs
         if (allureResultsDir.exists()) {
             logger.info("allure-results directory already exists, deleting for clean test...");
-            allureResultsDir.delete();
+            // Use recursive deletion to handle directories with content
+            deleteDirectoryRecursively(allureResultsDir);
         }
         
         // The directory should not exist before initialization

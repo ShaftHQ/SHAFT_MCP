@@ -75,6 +75,8 @@ public class EngineService {
                     boolean created = allureResultsDir.mkdirs();
                     if (created) {
                         logger.debug("Created allure-results directory at: {}", allureResultsPath);
+                    } else {
+                        logger.warn("Failed to create allure-results directory at: {}. This may cause Allure warnings.", allureResultsPath);
                     }
                 }
                 
