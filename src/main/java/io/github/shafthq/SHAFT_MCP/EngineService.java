@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class EngineService {
     private static final Logger logger = LoggerFactory.getLogger(EngineService.class);
     private static SHAFT.GUI.WebDriver driver;
+    private static boolean engineInitialized = false;
 
     /**
      * Retrieves the current WebDriver instance.
@@ -55,12 +56,24 @@ public class EngineService {
     @Tool(name = "driver_initialize", description = "launches browser")
     public void initializeDriver(BrowserType targetBrowser) {
         try {
-            TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
+            // Initialize engine setup only once to avoid repeated initialization warnings
+            if (!engineInitialized) {
+                logger.info("Initializing SHAFT Engine for AI Agent mode...");
+                TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
+                engineInitialized = true;
+                // Give the engine a moment to complete async initialization tasks
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    logger.warn("Engine initialization wait was interrupted", ie);
+                }
+            }
             SHAFT.Properties.web.set().targetBrowserName(targetBrowser.name());
             driver = new SHAFT.GUI.WebDriver();
-            logger.info("Driver initialized: {}", driver);
+            logger.info("Driver initialized successfully: {}", targetBrowser.name());
         } catch (Exception e) {
-            logger.error("Failed to initialize driver.", e);
+            logger.error("Failed to initialize driver for browser: {}", targetBrowser.name(), e);
             throw e;
         }
     }
