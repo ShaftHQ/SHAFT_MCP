@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
 @Service
 public class EngineService {
     private static final Logger logger = LoggerFactory.getLogger(EngineService.class);
@@ -59,15 +61,20 @@ public class EngineService {
             // Initialize engine setup only once to avoid repeated initialization warnings
             if (!engineInitialized) {
                 logger.info("Initializing SHAFT Engine for AI Agent mode...");
+                
+                // Pre-create the allure-results directory to prevent warnings during initialization
+                // This ensures the directory exists before Allure lifecycle is initialized
+                String allureResultsPath = System.getProperty("user.dir") + File.separator + "allure-results";
+                File allureResultsDir = new File(allureResultsPath);
+                if (!allureResultsDir.exists()) {
+                    boolean created = allureResultsDir.mkdirs();
+                    if (created) {
+                        logger.debug("Created allure-results directory at: {}", allureResultsPath);
+                    }
+                }
+                
                 TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
                 engineInitialized = true;
-                // Give the engine a moment to complete async initialization tasks
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    logger.warn("Engine initialization wait was interrupted", ie);
-                }
             }
             SHAFT.Properties.web.set().targetBrowserName(targetBrowser.name());
             driver = new SHAFT.GUI.WebDriver();
