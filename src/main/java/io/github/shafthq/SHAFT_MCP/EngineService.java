@@ -62,6 +62,11 @@ public class EngineService {
             if (!engineInitialized) {
                 logger.info("Initializing SHAFT Engine for AI Agent mode...");
                 
+                // Set default ReportPortal property if not already set to prevent NPE in SHAFT_ENGINE
+                if (System.getProperty("rp.enable") == null) {
+                    System.setProperty("rp.enable", "false");
+                }
+                
                 // Pre-create the allure-results directory to prevent warnings during initialization
                 // This ensures the directory exists before Allure lifecycle is initialized
                 String allureResultsPath = System.getProperty("user.dir") + File.separator + "allure-results";
