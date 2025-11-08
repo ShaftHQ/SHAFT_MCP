@@ -39,7 +39,7 @@
 		<java.version>21</java.version>
 		<spring-ai.version>1.0.3</spring-ai.version>
 		<!-- Make sure you point to the latest release version: https://github.com/ShaftHQ/SHAFT_ENGINE/releases -->
-		<shaft_engine.version>9.4.20251028</shaft_engine.version>
+		<shaft_engine.version>9.4.20251108</shaft_engine.version>
 		<aspectjweaver.version>1.9.25</aspectjweaver.version>
 		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
