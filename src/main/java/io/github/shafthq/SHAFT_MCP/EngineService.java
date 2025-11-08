@@ -10,10 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
 @Service
 public class EngineService {
     private static final Logger logger = LoggerFactory.getLogger(EngineService.class);
     private static SHAFT.GUI.WebDriver driver;
+    private static boolean engineInitialized = false;
 
     /**
      * Retrieves the current WebDriver instance.
@@ -55,12 +58,36 @@ public class EngineService {
     @Tool(name = "driver_initialize", description = "launches browser")
     public void initializeDriver(BrowserType targetBrowser) {
         try {
-            TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
+            // Initialize engine setup only once to avoid repeated initialization warnings
+            if (!engineInitialized) {
+                logger.info("Initializing SHAFT Engine for AI Agent mode...");
+                
+                // Set default ReportPortal property if not already set to prevent NPE in SHAFT_ENGINE
+                if (System.getProperty("rp.enable") == null) {
+                    System.setProperty("rp.enable", "false");
+                }
+                
+                // Pre-create the allure-results directory to prevent warnings during initialization
+                // This ensures the directory exists before Allure lifecycle is initialized
+                String allureResultsPath = System.getProperty("user.dir") + File.separator + "allure-results";
+                File allureResultsDir = new File(allureResultsPath);
+                if (!allureResultsDir.exists()) {
+                    boolean created = allureResultsDir.mkdirs();
+                    if (created) {
+                        logger.debug("Created allure-results directory at: {}", allureResultsPath);
+                    } else {
+                        logger.warn("Failed to create allure-results directory at: {}. This may cause Allure warnings.", allureResultsPath);
+                    }
+                }
+                
+                TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
+                engineInitialized = true;
+            }
             SHAFT.Properties.web.set().targetBrowserName(targetBrowser.name());
             driver = new SHAFT.GUI.WebDriver();
-            logger.info("Driver initialized: {}", driver);
+            logger.info("Driver initialized successfully: {}", targetBrowser.name());
         } catch (Exception e) {
-            logger.error("Failed to initialize driver.", e);
+            logger.error("Failed to initialize driver for browser: {}", targetBrowser.name(), e);
             throw e;
         }
     }
