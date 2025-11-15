@@ -71,15 +71,60 @@ The server provides 25+ tools for web automation:
 - `browser_delete_all_cookies` - Clear all cookies
 - `generate_test_report` - Generate Allure test reports
 
+## Distribution
+
+SHAFT MCP is available through multiple channels:
+
+- **GitHub MCP Registry**: Officially listed in the [Model Context Protocol Registry](https://registry.modelcontextprotocol.io/) as `io.github.shafthq/shaft-mcp`
+- **Maven Central**: Available as a Java JAR at `io.github.shafthq:SHAFT_MCP`
+- **GitHub Container Registry**: Docker images available at `ghcr.io/shafthq/shaft-mcp`
+
 ## Prerequisites
 
-- **Java 21** (OpenJDK 21.0.2 LTS or newer)
-- **Maven** (for building the project)
 - **Claude Desktop App** (latest version)
+- **Java 21** (OpenJDK 21.0.2 LTS or newer) - for JAR-based installation
+- **OR Docker** - for Docker-based installation
+- **Maven** (only if building from source)
 
 ## Setup Instructions
 
-### Step 1: Build the MCP Server
+You can install SHAFT MCP using either the JAR file or Docker container:
+
+### Option A: Using Docker (Recommended)
+
+1. **Close Claude Desktop** completely if it's running
+
+2. **Pull the Docker image:**
+```bash
+docker pull ghcr.io/shafthq/shaft-mcp:latest
+```
+
+3. **Locate your Claude config file:**
+   - **Windows**: `C:\Users\{USERNAME}\AppData\Roaming\Claude\claude_desktop_config.json`
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+4. **Edit the config file** and add the SHAFT MCP server configuration:
+
+```json
+{
+  "mcpServers": {
+    "shaft-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "ghcr.io/shafthq/shaft-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
+### Option B: Using JAR File
+
+#### Step 1: Build the MCP Server
 
 1. Navigate to your SHAFT_MCP repository directory:
 ```bash
@@ -93,7 +138,7 @@ mvn clean package -DskipTests -Dgpg.skip
 
 This will create: `target/SHAFT_MCP-9.4.20251108.jar`
 
-### Step 2: Configure Claude Desktop
+#### Step 2: Configure Claude Desktop
 
 1. **Close Claude Desktop** completely if it's running
 
@@ -123,7 +168,7 @@ This will create: `target/SHAFT_MCP-9.4.20251108.jar`
 - Ensure the JAR file version matches what was built (check the `target/` directory)
 - Use forward slashes `/` even on Windows, or double backslashes `\\\\` for Windows paths
 
-### Step 3: Verify Installation
+## Verify Installation
 
 1. **Start Claude Desktop**
 
