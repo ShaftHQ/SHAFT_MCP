@@ -4,7 +4,10 @@
   "title": "SHAFT MCP",
   "description": "Web automation and testing server using SHAFT Engine (Selenium-based)",
   "version": "9.4.20251116",
-  "repository": "https://github.com/ShaftHQ/SHAFT_MCP",
+  "repository": {
+    "url": "https://github.com/ShaftHQ/SHAFT_MCP",
+    "source": "github"
+  },
   "websiteUrl": "https://shafthq.github.io/",
   "packages": [
     {
