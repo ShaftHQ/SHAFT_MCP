@@ -68,6 +68,30 @@ jobs:
             ghcr.io/shafthq/shaft-mcp:${{ env.VERSION }}
             ghcr.io/shafthq/shaft-mcp:latest
 
+      # Validate server.json against schema
+      - name: Validate server.json
+        run: |
+          python3 -m pip install jsonschema --quiet
+          python3 << 'PYEOF'
+          import json
+          import urllib.request
+          from jsonschema import validate, ValidationError
+          
+          with open('server.json', 'r') as f:
+              server_data = json.load(f)
+          
+          schema_url = server_data.get('$schema')
+          with urllib.request.urlopen(schema_url) as response:
+              schema = json.loads(response.read())
+          
+          try:
+              validate(instance=server_data, schema=schema)
+              print("✅ server.json is valid according to the schema")
+          except ValidationError as e:
+              print(f"❌ server.json validation failed: {e.message}")
+              raise
+          PYEOF
+
       # Install MCP Publisher CLI
       - name: Install MCP Publisher
         run: |
