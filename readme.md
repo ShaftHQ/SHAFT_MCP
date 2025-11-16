@@ -75,7 +75,7 @@ The server provides 25+ tools for web automation:
 
 SHAFT MCP is available through multiple channels:
 
-- **GitHub MCP Registry**: Officially listed in the [Model Context Protocol Registry](https://registry.modelcontextprotocol.io/) as `io.github.shafthq/shaft-mcp`
+- **GitHub MCP Registry**: Officially listed in the [Model Context Protocol Registry](https://registry.modelcontextprotocol.io/) as `io.github.ShaftHQ/shaft-mcp`
 - **Maven Central**: Available as a Java JAR at `io.github.shafthq:SHAFT_MCP`
 - **GitHub Container Registry**: Docker images available at `ghcr.io/shafthq/shaft-mcp`
 
