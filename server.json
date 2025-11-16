@@ -8,7 +8,7 @@
     "url": "https://github.com/ShaftHQ/SHAFT_MCP",
     "source": "github"
   },
-  "websiteUrl": "https://shafthq.github.io/",
+  "websiteUrl": "https://ShaftHQ.github.io/",
   "packages": [
     {
       "registryType": "oci",
