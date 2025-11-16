@@ -34,6 +34,10 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
 
+      # Install jq for JSON processing
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       # Update server.json with current version
       - name: Update server.json version
         run: |
@@ -67,7 +71,7 @@ jobs:
       # Install MCP Publisher CLI
       - name: Install MCP Publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar -xz -f - mcp-publisher
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar -xzf - mcp-publisher
           chmod +x mcp-publisher
 
       # Authenticate with MCP Registry using GitHub OIDC
