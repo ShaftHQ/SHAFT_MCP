@@ -49,9 +49,16 @@
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 	</properties>
 	<dependencies>
+		<!-- MCP Server STDIO support (for Claude Desktop) -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-mcp-server</artifactId>
+		</dependency>
+
+		<!-- MCP Server HTTP/SSE support (for Smithery and web-based clients) -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
 		</dependency>
 
 		<dependency>
