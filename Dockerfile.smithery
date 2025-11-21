@@ -31,5 +31,3 @@ ENV SPRING_PROFILES_ACTIVE=http
 
 # Run the application
 CMD ["java", "-jar", "SHAFT_MCP.jar"]
-
-
