@@ -32,15 +32,15 @@ This guide explains how to deploy SHAFT MCP to Smithery.ai and other hosting pla
    
    Smithery will use the configuration in `smithery.yaml`:
    - Runtime: Container
-   - Build: `Dockerfile.smithery`
+   - Build: `Dockerfile.smithery.build`
    - Start command: HTTP (port 8081)
-   - MCP SSE endpoint: `/sse`
+   - MCP SSE endpoint: `/mcp`
    
 4. **Deploy**
    
-   - Smithery will build the Docker image from `Dockerfile.smithery`
+   - Smithery will build the Docker image from `Dockerfile.smithery.build`
    - The server will start with HTTP/SSE transport enabled
-   - The MCP endpoint will be available at `/sse`
+   - The MCP endpoint will be available at `/mcp`
 
 ### Local Testing Before Deployment
 
@@ -48,13 +48,13 @@ Test the HTTP transport locally:
 
 ```bash
 # Build the Docker image
-docker build -f Dockerfile.smithery -t shaft-mcp-http .
+docker build -f Dockerfile.smithery.build -t shaft-mcp-http .
 
 # Run the container
-docker run -p 8081:8081 -e PORT=8081 shaft-mcp-http
+docker run -p 8081:8081 -e PORT=8081 -e SPRING_PROFILES_ACTIVE=http shaft-mcp-http
 
 # Test the endpoint (in another terminal)
-curl -N -H "Accept: text/event-stream" http://localhost:8081/sse
+curl -N -H "Accept: text/event-stream" http://localhost:8081/mcp
 ```
 
 ### Configuration Options
@@ -237,6 +237,7 @@ While Smithery provides excellent integration for MCP servers, you have several 
 - **Configuration**: `application-http.properties`
 - **Deployment**: Docker container with HTTP endpoint
 - **Profile**: `http` (activated via `SPRING_PROFILES_ACTIVE=http`)
+- **Endpoint**: `/mcp` (configured via `spring.ai.mcp.server.sse-endpoint=/mcp`)
 
 ## Troubleshooting
 
