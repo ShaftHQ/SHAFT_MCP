@@ -78,6 +78,23 @@ SHAFT MCP is available through multiple channels:
 - **GitHub MCP Registry**: Officially listed in the [Model Context Protocol Registry](https://registry.modelcontextprotocol.io/) as `io.github.ShaftHQ/shaft-mcp`
 - **Maven Central**: Available as a Java JAR at `io.github.shafthq:SHAFT_MCP`
 - **GitHub Container Registry**: Docker images available at `ghcr.io/shafthq/shaft-mcp`
+- **Smithery.ai**: Deploy via Smithery for hosted MCP server (see [SMITHERY_DEPLOYMENT.md](SMITHERY_DEPLOYMENT.md))
+
+## Deployment Options
+
+SHAFT MCP supports two deployment modes:
+
+### 1. Local Deployment (Claude Desktop)
+Uses **STDIO transport** for direct integration with Claude Desktop application. See setup instructions below.
+
+### 2. Remote Deployment (Smithery & Web)
+Uses **HTTP/SSE transport** for web-based access and remote hosting platforms like Smithery.ai, Railway, Render, etc.
+
+📖 **For Smithery and remote deployment instructions**, see the comprehensive [Smithery Deployment Guide](SMITHERY_DEPLOYMENT.md) which includes:
+- Step-by-step Smithery deployment
+- Local testing with Docker
+- 10+ alternative hosting platforms comparison
+- Configuration options and best practices
 
 ## Prerequisites
 
