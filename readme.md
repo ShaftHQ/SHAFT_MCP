@@ -107,21 +107,92 @@ Uses **HTTP/SSE transport** for web-based access and remote hosting platforms li
 
 You can install SHAFT MCP using either the JAR file or Docker container:
 
-### Option A: Using Docker (Recommended)
+### Option A: Using Docker (Recommended for Remote Browser Control)
 
-1. **Close Claude Desktop** completely if it's running
+When using Docker, SHAFT MCP can connect to a Selenium Server running on your host machine, allowing it to control browsers on your computer rather than inside the container.
 
-2. **Pull the Docker image:**
+#### Step 1: Set up Selenium Server on Host Machine
+
+First, you need to run Selenium Server (Selenium Grid) on your host machine:
+
+```bash
+# Pull and run Selenium Grid Standalone with Chrome
+docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" \
+  selenium/standalone-chrome:latest
+
+# Or for Firefox
+docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" \
+  selenium/standalone-firefox:latest
+```
+
+You can verify Selenium is running by visiting: `http://localhost:4444`
+
+**Optional**: View the browser session in real-time at `http://localhost:7900` (password: `secret`)
+
+#### Step 2: Pull the SHAFT MCP Docker Image
+
 ```bash
 docker pull ghcr.io/shafthq/shaft-mcp:latest
 ```
 
-3. **Locate your Claude config file:**
+#### Step 3: Configure Claude Desktop
+
+1. **Close Claude Desktop** completely if it's running
+
+2. **Locate your Claude config file:**
    - **Windows**: `C:\Users\{USERNAME}\AppData\Roaming\Claude\claude_desktop_config.json`
    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-4. **Edit the config file** and add the SHAFT MCP server configuration:
+3. **Edit the config file** and add the SHAFT MCP server configuration with remote WebDriver settings:
+
+**For macOS/Linux:**
+```json
+{
+  "mcpServers": {
+    "shaft-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "-e", "EXECUTION_TYPE=Remote",
+        "-e", "REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub",
+        "ghcr.io/shafthq/shaft-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
+**For Windows:**
+```json
+{
+  "mcpServers": {
+    "shaft-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e", "EXECUTION_TYPE=Remote",
+        "-e", "REMOTE_DRIVER_ADDRESS=http://host.docker.internal:4444/wd/hub",
+        "ghcr.io/shafthq/shaft-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
+**Note**: 
+- On macOS/Linux with `--network=host`, the container can access `localhost` directly
+- On Windows, use `host.docker.internal` to access the host machine from the container
+- If you're using Selenium Grid on a different port, update the `REMOTE_DRIVER_ADDRESS` accordingly
+
+### Option A (Alternative): Using Docker for Local Browser (Not Recommended)
+
+If you want browsers to run inside the Docker container (not recommended due to limitations), you can use the basic configuration:
 
 ```json
 {
@@ -138,6 +209,8 @@ docker pull ghcr.io/shafthq/shaft-mcp:latest
   }
 }
 ```
+
+However, this requires the Docker image to have browsers and display drivers installed, which is complex and not currently supported.
 
 ### Option B: Using JAR File
 
@@ -261,6 +334,18 @@ Use shaft-mcp to:
    - Try different locator strategies (CSS, XPath, ID, etc.)
    - Check if the element is visible with `element_is_displayed`
 
+5. **Docker container cannot connect to host Selenium Server**
+   - **On Windows**: Ensure you're using `host.docker.internal` instead of `localhost` in `REMOTE_DRIVER_ADDRESS`
+   - **On macOS/Linux**: Make sure you're using `--network=host` in the docker run arguments
+   - Verify Selenium Server is running: `curl http://localhost:4444/status`
+   - Check firewall settings aren't blocking port 4444
+   - Make sure `EXECUTION_TYPE=Remote` environment variable is set in the Docker configuration
+
+6. **Browser opens inside Docker container instead of on host**
+   - This happens when `EXECUTION_TYPE` and `REMOTE_DRIVER_ADDRESS` are not properly configured
+   - Verify the environment variables are set in the Claude Desktop config
+   - Check the SHAFT MCP logs to confirm remote configuration was detected
+
 ### Advanced Configuration
 
 You can add additional MCP servers alongside SHAFT MCP:
@@ -281,6 +366,24 @@ You can add additional MCP servers alongside SHAFT MCP:
     }
   }
 }
+```
+
+### Remote WebDriver with JAR Installation
+
+You can also use remote WebDriver with the JAR installation by setting environment variables before starting Claude Desktop:
+
+**On macOS/Linux:**
+```bash
+export EXECUTION_TYPE=Remote
+export REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub
+# Then start Claude Desktop
+```
+
+**On Windows (PowerShell):**
+```powershell
+$env:EXECUTION_TYPE="Remote"
+$env:REMOTE_DRIVER_ADDRESS="http://localhost:4444/wd/hub"
+# Then start Claude Desktop
 ```
 
 ## What This Enables

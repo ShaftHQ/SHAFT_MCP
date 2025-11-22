@@ -67,6 +67,21 @@ public class EngineService {
                     System.setProperty("rp.enable", "false");
                 }
                 
+                // Configure remote WebDriver if environment variables are set
+                // This allows Docker containers to connect to Selenium Server on host machine
+                String executionType = System.getenv("EXECUTION_TYPE");
+                String remoteDriverAddress = System.getenv("REMOTE_DRIVER_ADDRESS");
+                
+                if (executionType != null && !executionType.isEmpty()) {
+                    System.setProperty("web.executionType", executionType);
+                    logger.info("Execution type set to: {}", executionType);
+                }
+                
+                if (remoteDriverAddress != null && !remoteDriverAddress.isEmpty()) {
+                    System.setProperty("web.remoteDriverAddress", remoteDriverAddress);
+                    logger.info("Remote driver address set to: {}", remoteDriverAddress);
+                }
+                
                 // Pre-create the allure-results directory to prevent warnings during initialization
                 // This ensures the directory exists before Allure lifecycle is initialized
                 String allureResultsPath = System.getProperty("user.dir") + File.separator + "allure-results";
