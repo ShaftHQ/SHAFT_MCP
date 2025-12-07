@@ -1,3 +1,4 @@
+```html
 <h1>
 <picture>
   <!-- User prefers light mode: -->
@@ -10,6 +11,8 @@
   <img src="https://github.com/user-attachments/assets/016ebb3c-4090-4f07-a9b3-830fdf4cb696"/>
 </picture> SHAFT MCP Server Setup Guide
 </h1>
+
+<a href="https://smithery.ai/server/@ShaftHQ/shaft_mcp"><img alt="Smithery Badge" src="https://smithery.ai/badge/@ShaftHQ/shaft_mcp"></a>
 
 <img width="1280" height="720" alt="New Project" src="https://github.com/user-attachments/assets/cda129a7-592b-4e82-8294-dbed364d0e2d" />
 
@@ -294,3 +297,4 @@ With SHAFT MCP configured, Claude can:
 - **AI-powered element detection** - Find elements by description instead of technical locators
 
 This essentially turns Claude into a powerful web automation assistant that can handle complex browser-based tasks that would normally require manual effort or custom scripting.
+```
