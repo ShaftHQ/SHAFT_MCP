@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>4.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.github.shafthq</groupId>
 	<artifactId>SHAFT_MCP</artifactId>
-	<version>9.4.20251116</version> <!-- Update this version in Dockerfile, src/main/resources/application.properties, HELP.md, readme.md on every release -->
+	<version>9.4.20251108</version> <!-- Update this version in Dockerfile, src/main/resources/application.properties, HELP.md, readme.md on every release -->
 	<name>SHAFT_MCP</name>
 	<description>Agentic SHAFT_Engine with Spring AI</description>
     <url>https://shafthq.github.io/</url>
@@ -36,16 +36,16 @@
 	<properties>
         <commandToPackage>mvn clean package "-DskipTests" "-Dgpg.skip"</commandToPackage>
         <commandToTest>mvn clean test</commandToTest>
-		<java.version>21</java.version>
-		<spring-ai.version>1.0.3</spring-ai.version>
+		<java.version>25</java.version>
+		<spring-ai.version>1.1.2</spring-ai.version>
 		<!-- Make sure you point to the latest release version: https://github.com/ShaftHQ/SHAFT_ENGINE/releases -->
-		<shaft_engine.version>9.4.20251108</shaft_engine.version>
-		<aspectjweaver.version>1.9.25</aspectjweaver.version>
+		<shaft_engine.version>10.1.20260312</shaft_engine.version>
+		<aspectjweaver.version>1.9.25.1</aspectjweaver.version>
 		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
-		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-		<surefire-testng.version>3.5.4</surefire-testng.version>
-		<maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-		<junit-jupiter-engine.version>6.0.1</junit-jupiter-engine.version>
+		<maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+		<surefire-testng.version>3.5.5</surefire-testng.version>
+		<maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+		<junit-jupiter-engine.version>6.0.3</junit-jupiter-engine.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 	</properties>
 	<dependencies>
@@ -117,6 +117,27 @@
 	<build>
 		<plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[25,)</version>
+                                    <message>This project requires Java 25 or newer. Please update your JDK.</message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
@@ -125,8 +146,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <release>${java.version}</release>
                     <encoding>UTF-8</encoding>
                     <meminitial>4096m</meminitial>
                 </configuration>
@@ -164,7 +184,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -187,7 +207,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
+                <version>0.10.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
