@@ -37,3 +37,4 @@ build/
 
 ### VS Code ###
 .vscode/
+*.class
