@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.1</version>
+		<version>4.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.github.shafthq</groupId>
@@ -36,16 +36,16 @@
 	<properties>
         <commandToPackage>mvn clean package "-DskipTests" "-Dgpg.skip"</commandToPackage>
         <commandToTest>mvn clean test</commandToTest>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 		<spring-ai.version>1.1.2</spring-ai.version>
 		<!-- Make sure you point to the latest release version: https://github.com/ShaftHQ/SHAFT_ENGINE/releases -->
-		<shaft_engine.version>9.4.20251108</shaft_engine.version>
+		<shaft_engine.version>10.1.20260312</shaft_engine.version>
 		<aspectjweaver.version>1.9.25.1</aspectjweaver.version>
 		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
-		<maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
-		<surefire-testng.version>3.5.4</surefire-testng.version>
-		<maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-		<junit-jupiter-engine.version>6.0.2</junit-jupiter-engine.version>
+		<maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+		<surefire-testng.version>3.5.5</surefire-testng.version>
+		<maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+		<junit-jupiter-engine.version>6.0.3</junit-jupiter-engine.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 	</properties>
 	<dependencies>
@@ -125,8 +125,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>25</source>
+                    <target>25</target>
                     <encoding>UTF-8</encoding>
                     <meminitial>4096m</meminitial>
                 </configuration>
@@ -187,7 +187,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
+                <version>0.10.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
