@@ -87,16 +87,22 @@ public class EngineService {
                     logger.info("Remote driver address configured (address redacted for security)");
                 }
                 
-                // Pre-create the allure-results directory to prevent warnings during initialization
-                // This ensures the directory exists before Allure lifecycle is initialized
-                String allureResultsPath = System.getProperty("user.dir") + File.separator + "allure-results";
-                File allureResultsDir = new File(allureResultsPath);
-                if (!allureResultsDir.exists()) {
-                    boolean created = allureResultsDir.mkdirs();
-                    if (created) {
-                        logger.debug("Created allure-results directory at: {}", allureResultsPath);
-                    } else {
-                        logger.warn("Failed to create allure-results directory at: {}. This may cause Allure warnings.", allureResultsPath);
+                // Pre-create directories to prevent issues during SHAFT Engine initialization.
+                // The allure-results directory must exist before Allure lifecycle is initialized.
+                // The properties directory must exist (empty) before engineSetup() to prevent
+                // SHAFT Engine from extracting default property files with subdirectories that
+                // cause "Is a directory" IOException during ReportHelper.attachPropertyFiles().
+                for (String dirPath : new String[]{
+                        System.getProperty("user.dir") + File.separator + "allure-results",
+                        "src" + File.separator + "main" + File.separator + "resources" + File.separator + "properties"
+                }) {
+                    File dir = new File(dirPath);
+                    if (!dir.exists()) {
+                        if (dir.mkdirs()) {
+                            logger.debug("Created directory: {}", dirPath);
+                        } else {
+                            logger.warn("Failed to create directory: {}", dirPath);
+                        }
                     }
                 }
                 
