@@ -69,17 +69,22 @@ public class EngineService {
                 
                 // Configure remote WebDriver if environment variables are set
                 // This allows Docker containers to connect to Selenium Server on host machine
+                // Environment variables only apply when the corresponding system property is not already set,
+                // so explicit -D flags on the JVM command line always take precedence.
                 String executionType = System.getenv("EXECUTION_TYPE");
                 String remoteDriverAddress = System.getenv("REMOTE_DRIVER_ADDRESS");
                 
-                if (executionType != null && !executionType.isEmpty()) {
+                if (executionType != null && !executionType.isEmpty()
+                        && System.getProperty("web.executionType") == null) {
                     System.setProperty("web.executionType", executionType);
-                    logger.info("Execution type set to: {}", executionType);
+                    logger.info("Remote execution type configured: {}", executionType);
                 }
                 
-                if (remoteDriverAddress != null && !remoteDriverAddress.isEmpty()) {
+                if (remoteDriverAddress != null && !remoteDriverAddress.isEmpty()
+                        && System.getProperty("web.remoteDriverAddress") == null) {
                     System.setProperty("web.remoteDriverAddress", remoteDriverAddress);
-                    logger.info("Remote driver address set to: {}", remoteDriverAddress);
+                    // Log only that remote mode is active, not the full URL which may contain credentials
+                    logger.info("Remote driver address configured (address redacted for security)");
                 }
                 
                 // Pre-create the allure-results directory to prevent warnings during initialization

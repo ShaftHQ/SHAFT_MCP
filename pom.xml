@@ -273,6 +273,7 @@
 						<configuration>
 							<systemPropertyVariables>
 								<testng.dtd.http>true</testng.dtd.http>
+								<rp.enable>false</rp.enable>
 							</systemPropertyVariables>
 							<failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
 							<failIfNoTests>false</failIfNoTests>
@@ -321,6 +322,7 @@
 						<configuration>
 							<systemPropertyVariables>
 								<testng.dtd.http>true</testng.dtd.http>
+								<rp.enable>false</rp.enable>
 							</systemPropertyVariables>
 							<failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
 							<failIfNoTests>false</failIfNoTests>

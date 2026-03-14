@@ -120,9 +120,8 @@ class EngineServiceTest {
         assertNotNull(title, "Title should not be null");
         assertFalse(title.isEmpty(), "Title should not be empty");
 
-        // Quit browser (also handled by @AfterEach)
-        engineService.quitDriver();
         logger.info("Full browser session lifecycle completed successfully");
+        // Driver cleanup is handled by @AfterEach tearDown()
     }
 
     /**

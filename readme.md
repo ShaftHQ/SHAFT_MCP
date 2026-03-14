@@ -146,7 +146,7 @@ docker pull ghcr.io/shafthq/shaft-mcp:latest
 
 3. **Edit the config file** and add the SHAFT MCP server configuration with remote WebDriver settings:
 
-**For macOS/Linux:**
+**For Linux:**
 ```json
 {
   "mcpServers": {
@@ -166,7 +166,7 @@ docker pull ghcr.io/shafthq/shaft-mcp:latest
 }
 ```
 
-**For Windows:**
+**For macOS and Windows:**
 ```json
 {
   "mcpServers": {
@@ -186,8 +186,8 @@ docker pull ghcr.io/shafthq/shaft-mcp:latest
 ```
 
 **Note**: 
-- On macOS/Linux with `--network=host`, the container can access `localhost` directly
-- On Windows, use `host.docker.internal` to access the host machine from the container
+- On **Linux**, `--network=host` lets the container use the host's network stack, so `localhost` resolves to the host machine
+- On **macOS and Windows**, Docker runs inside a VM, so `--network=host` does **not** expose the host's network. Use `host.docker.internal` instead, which Docker automatically resolves to the host machine's IP
 - If you're using Selenium Grid on a different port, update the `REMOTE_DRIVER_ADDRESS` accordingly
 
 ### Option A (Alternative): Using Docker for Local Browser (Not Recommended)
@@ -335,8 +335,8 @@ Use shaft-mcp to:
    - Check if the element is visible with `element_is_displayed`
 
 5. **Docker container cannot connect to host Selenium Server**
-   - **On Windows**: Ensure you're using `host.docker.internal` instead of `localhost` in `REMOTE_DRIVER_ADDRESS`
-   - **On macOS/Linux**: Make sure you're using `--network=host` in the docker run arguments
+   - **On Linux**: Make sure you're using `--network=host` in the docker run arguments
+   - **On macOS and Windows**: Ensure you're using `host.docker.internal` instead of `localhost` in `REMOTE_DRIVER_ADDRESS` (Docker Desktop on macOS/Windows runs in a VM so `--network=host` does not expose the host network)
    - Verify Selenium Server is running: `curl http://localhost:4444/status`
    - Check firewall settings aren't blocking port 4444
    - Make sure `EXECUTION_TYPE=Remote` environment variable is set in the Docker configuration
