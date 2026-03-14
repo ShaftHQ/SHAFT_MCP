@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 
 # MCP Registry validation label
 LABEL io.modelcontextprotocol.server.name="io.github.ShaftHQ/shaft-mcp"

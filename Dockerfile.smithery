@@ -1,7 +1,7 @@
 # Dockerfile for Smithery deployment
 # Uses pre-built JAR from Maven Central for faster deployment
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 
 # Install Chrome and dependencies for web automation (headless mode)
 RUN apt-get update && apt-get install -y \
