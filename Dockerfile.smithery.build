@@ -2,7 +2,7 @@
 # This builds the application from source code within the container
 
 # Build stage
-FROM eclipse-temurin:21-jdk AS builder
+FROM eclipse-temurin:25-jdk AS builder
 
 WORKDIR /build
 
@@ -25,7 +25,7 @@ COPY src src
 RUN ./mvnw clean package -DskipTests -Dgpg.skip
 
 # Runtime stage
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 
 # Install Chrome and dependencies for web automation (headless mode)
 RUN apt-get update && apt-get install -y \
