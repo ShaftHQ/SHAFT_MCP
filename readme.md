@@ -99,7 +99,7 @@ Uses **HTTP/SSE transport** for web-based access and remote hosting platforms li
 ## Prerequisites
 
 - **Claude Desktop App** (latest version)
-- **Java 21** (OpenJDK 21.0.2 LTS or newer) - for JAR-based installation
+- **Java 25** (OpenJDK 25 or newer) - for JAR-based installation
 - **OR Docker** - for Docker-based installation
 - **Maven** (only if building from source)
 
@@ -224,7 +224,7 @@ cd /path/to/ShaftHQ/SHAFT_MCP
 mvn clean package -DskipTests -Dgpg.skip
 ```
 
-This will create: `target/SHAFT_MCP-10.1.20260312.jar`
+This will create: `target/SHAFT_MCP-10.1.20260315.jar`
 
 #### Step 2: Configure Claude Desktop
 
@@ -244,7 +244,7 @@ This will create: `target/SHAFT_MCP-10.1.20260312.jar`
       "command": "java",
       "args": [
         "-jar",
-        "/FULL/PATH/TO/SHAFT_MCP/target/SHAFT_MCP-10.1.20260312.jar"
+        "/FULL/PATH/TO/SHAFT_MCP/target/SHAFT_MCP-10.1.20260315.jar"
       ]
     }
   }
@@ -319,11 +319,11 @@ Use shaft-mcp to:
 
 2. **MCP Server not running**
    - Verify the JAR file path is correct and absolute
-   - Check that Java 21 is installed and accessible
+   - Check that Java 25 is installed and accessible
    - Ensure Claude Desktop was restarted after config changes
 
 3. **Build failures**
-   - Verify Java 21 is installed: `java -version`
+   - Verify Java 25 is installed: `java -version`
    - Ensure Maven is available: `mvn -version`
    - Try cleaning first: `mvn clean`
 
@@ -353,7 +353,7 @@ You can add additional MCP servers alongside SHAFT MCP:
   "mcpServers": {
     "shaft-mcp": {
       "command": "java",
-      "args": ["-jar", "/path/to/SHAFT_MCP-10.1.20260312.jar"]
+      "args": ["-jar", "/path/to/SHAFT_MCP-10.1.20260315.jar"]
     },
     "github": {
       "command": "npx",
