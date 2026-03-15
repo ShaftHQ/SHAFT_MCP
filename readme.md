@@ -157,7 +157,6 @@ docker pull ghcr.io/shafthq/shaft-mcp:latest
         "--rm",
         "-i",
         "--network=host",
-        "-e", "EXECUTION_TYPE=Remote",
         "-e", "REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub",
         "ghcr.io/shafthq/shaft-mcp:latest"
       ]
@@ -176,7 +175,6 @@ docker pull ghcr.io/shafthq/shaft-mcp:latest
         "run",
         "--rm",
         "-i",
-        "-e", "EXECUTION_TYPE=Remote",
         "-e", "REMOTE_DRIVER_ADDRESS=http://host.docker.internal:4444/wd/hub",
         "ghcr.io/shafthq/shaft-mcp:latest"
       ]
@@ -339,11 +337,11 @@ Use shaft-mcp to:
    - **On macOS and Windows**: Ensure you're using `host.docker.internal` instead of `localhost` in `REMOTE_DRIVER_ADDRESS` (Docker Desktop on macOS/Windows runs in a VM so `--network=host` does not expose the host network)
    - Verify Selenium Server is running: `curl http://localhost:4444/status`
    - Check firewall settings aren't blocking port 4444
-   - Make sure `EXECUTION_TYPE=Remote` environment variable is set in the Docker configuration
+   - Make sure `REMOTE_DRIVER_ADDRESS` is set to the correct Selenium Server URL in the Docker configuration
 
 6. **Browser opens inside Docker container instead of on host**
-   - This happens when `EXECUTION_TYPE` and `REMOTE_DRIVER_ADDRESS` are not properly configured
-   - Verify the environment variables are set in the Claude Desktop config
+   - This happens when `REMOTE_DRIVER_ADDRESS` is not properly configured
+   - Verify the environment variable is set in the Claude Desktop config
    - Check the SHAFT MCP logs to confirm remote configuration was detected
 
 ### Advanced Configuration
@@ -374,14 +372,12 @@ You can also use remote WebDriver with the JAR installation by setting environme
 
 **On macOS/Linux:**
 ```bash
-export EXECUTION_TYPE=Remote
 export REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub
 # Then start Claude Desktop
 ```
 
 **On Windows (PowerShell):**
 ```powershell
-$env:EXECUTION_TYPE="Remote"
 $env:REMOTE_DRIVER_ADDRESS="http://localhost:4444/wd/hub"
 # Then start Claude Desktop
 ```

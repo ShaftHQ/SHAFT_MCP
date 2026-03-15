@@ -31,7 +31,6 @@ jobs:
 
       - name: Run tests
         env:
-          EXECUTION_TYPE: Remote
           REMOTE_DRIVER_ADDRESS: http://localhost:4444/wd/hub
         run: |
           mkdir -p src/main/resources/properties

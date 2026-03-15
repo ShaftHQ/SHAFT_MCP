@@ -8,9 +8,9 @@ ADD https://repo1.maven.org/maven2/io/github/shafthq/SHAFT_MCP/10.1.20260312/SHA
 
 WORKDIR /app
 
-# Environment variables for remote WebDriver configuration
-# These can be overridden when running the container to connect to Selenium Server on host
-ENV EXECUTION_TYPE=""
+# Set REMOTE_DRIVER_ADDRESS to a Selenium Grid URL (e.g. http://host.docker.internal:4444/wd/hub)
+# to make SHAFT MCP connect to browsers running on the host machine instead of launching them
+# inside this container.  Leave empty (the default) to launch a local browser.
 ENV REMOTE_DRIVER_ADDRESS=""
 
 # Run the main class from the JAR
