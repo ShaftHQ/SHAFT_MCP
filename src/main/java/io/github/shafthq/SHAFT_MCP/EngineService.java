@@ -4,6 +4,7 @@ import com.shaft.driver.SHAFT;
 import com.shaft.listeners.TestNGListener;
 import com.shaft.tools.io.internal.AllureManager;
 import com.shaft.tools.io.internal.ProjectStructureManager;
+import jakarta.annotation.PostConstruct;
 import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,36 @@ public class EngineService {
     private static final Logger logger = LoggerFactory.getLogger(EngineService.class);
     private static SHAFT.GUI.WebDriver driver;
     private static boolean engineInitialized = false;
+
+    /**
+     * Called by Spring after this bean is constructed.
+     * Applies remote WebDriver configuration from the {@code REMOTE_DRIVER_ADDRESS}
+     * environment variable so that ALL WebDriver instances — including those created
+     * directly by tests without going through {@link #initializeDriver} — connect to
+     * the remote Selenium Server rather than trying to launch a local browser.
+     */
+    @PostConstruct
+    void configureRemoteExecution() {
+        // Set default ReportPortal property to prevent NPE in SHAFT_ENGINE
+        if (System.getProperty("rp.enable") == null) {
+            System.setProperty("rp.enable", "false");
+        }
+
+        // Configure remote WebDriver if REMOTE_DRIVER_ADDRESS environment variable is set.
+        // SHAFT Engine uses a single "executionAddress" property:
+        //   - "local"          → launch a browser on this machine
+        //   - "<selenium URL>" → connect to an existing Selenium/Grid server
+        // Setting REMOTE_DRIVER_ADDRESS to a Selenium Grid URL (e.g.
+        // http://localhost:4444/wd/hub) makes SHAFT Engine connect remotely.
+        // The env var is only applied when the system property is not already set,
+        // so an explicit -DexecutionAddress=... JVM flag always takes precedence.
+        String remoteDriverAddress = System.getenv("REMOTE_DRIVER_ADDRESS");
+        if (remoteDriverAddress != null && !remoteDriverAddress.isEmpty()
+                && System.getProperty("executionAddress") == null) {
+            System.setProperty("executionAddress", remoteDriverAddress);
+            logger.info("Remote WebDriver configured (address redacted for security)");
+        }
+    }
 
     /**
      * Retrieves the current WebDriver instance.
@@ -61,25 +92,26 @@ public class EngineService {
             // Initialize engine setup only once to avoid repeated initialization warnings
             if (!engineInitialized) {
                 logger.info("Initializing SHAFT Engine for AI Agent mode...");
-                
-                // Set default ReportPortal property if not already set to prevent NPE in SHAFT_ENGINE
-                if (System.getProperty("rp.enable") == null) {
-                    System.setProperty("rp.enable", "false");
-                }
-                
-                // Pre-create the allure-results directory to prevent warnings during initialization
-                // This ensures the directory exists before Allure lifecycle is initialized
-                String allureResultsPath = System.getProperty("user.dir") + File.separator + "allure-results";
-                File allureResultsDir = new File(allureResultsPath);
-                if (!allureResultsDir.exists()) {
-                    boolean created = allureResultsDir.mkdirs();
-                    if (created) {
-                        logger.debug("Created allure-results directory at: {}", allureResultsPath);
-                    } else {
-                        logger.warn("Failed to create allure-results directory at: {}. This may cause Allure warnings.", allureResultsPath);
+
+                // Pre-create directories to prevent issues during SHAFT Engine initialization.
+                // The allure-results directory must exist before Allure lifecycle is initialized.
+                // The properties directory must exist (empty) before engineSetup() to prevent
+                // SHAFT Engine from extracting default property files with subdirectories that
+                // cause "Is a directory" IOException during ReportHelper.attachPropertyFiles().
+                for (String dirPath : new String[]{
+                        System.getProperty("user.dir") + File.separator + "allure-results",
+                        "src" + File.separator + "main" + File.separator + "resources" + File.separator + "properties"
+                }) {
+                    File dir = new File(dirPath);
+                    if (!dir.exists()) {
+                        if (dir.mkdirs()) {
+                            logger.debug("Created directory: {}", dirPath);
+                        } else {
+                            logger.warn("Failed to create directory: {}", dirPath);
+                        }
                     }
                 }
-                
+
                 TestNGListener.engineSetup(ProjectStructureManager.RunType.AI_AGENT);
                 engineInitialized = true;
             }
