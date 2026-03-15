@@ -99,7 +99,7 @@ Uses **HTTP/SSE transport** for web-based access and remote hosting platforms li
 ## Prerequisites
 
 - **Claude Desktop App** (latest version)
-- **Java 21** (OpenJDK 21.0.2 LTS or newer) - for JAR-based installation
+- **Java 25** (OpenJDK 25 or newer) - for JAR-based installation
 - **OR Docker** - for Docker-based installation
 - **Maven** (only if building from source)
 
@@ -319,11 +319,11 @@ Use shaft-mcp to:
 
 2. **MCP Server not running**
    - Verify the JAR file path is correct and absolute
-   - Check that Java 21 is installed and accessible
+   - Check that Java 25 is installed and accessible
    - Ensure Claude Desktop was restarted after config changes
 
 3. **Build failures**
-   - Verify Java 21 is installed: `java -version`
+   - Verify Java 25 is installed: `java -version`
    - Ensure Maven is available: `mvn -version`
    - Try cleaning first: `mvn clean`
 

@@ -242,7 +242,7 @@ While Smithery provides excellent integration for MCP servers, you have several 
 ## Troubleshooting
 
 ### Docker Build Fails
-- Ensure Java 21 is installed in the base image
+- Ensure Java 25 is installed in the base image
 - Check that all dependencies are correctly specified in `pom.xml`
 - Verify network connectivity for Maven downloads
 
