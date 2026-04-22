@@ -1,0 +1,16 @@
+name: "Test run report"
+output: "/home/runner/work/SHAFT_MCP/SHAFT_MCP/target/allure-report"
+historyPath: "/home/runner/work/SHAFT_MCP/SHAFT_MCP/target/history.jsonl"
+appendHistory: true
+
+plugins:
+  awesome:
+    options:
+      reportName: "Test run report"
+      singleFile: true
+      reportLanguage: "en"
+      open: false
+      groupBy:
+        - parentSuite
+        - suite
+        - subSuite
