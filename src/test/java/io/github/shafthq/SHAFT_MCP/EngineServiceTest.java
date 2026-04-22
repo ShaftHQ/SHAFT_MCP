@@ -139,4 +139,45 @@ class EngineServiceTest {
         assertThrows(Exception.class, () -> browserService.getCurrentUrl(),
                 "Browser operations after quit should throw an exception");
     }
+
+    /**
+     * Tests the end-to-end cloud automation scenario described in the deployment task:
+     * <ol>
+     *   <li>Launch Chrome</li>
+     *   <li>Navigate to DuckDuckGo</li>
+     *   <li>Search for "shaft_engine"</li>
+     *   <li>Wait for search results</li>
+     *   <li>Retrieve the URL of the first organic search result</li>
+     *   <li>Assert the URL contains "github.com/ShaftHQ/SHAFT_ENGINE" (case-insensitive)</li>
+     * </ol>
+     */
+    @Test
+    void testDuckDuckGoSearchScenario() {
+        engineService.initializeDriver(BrowserType.CHROME);
+        browserService.navigate("https://duckduckgo.com");
+
+        // Type the search query into the DuckDuckGo search box
+        elementService.type(locatorStrategy.NAME, "q", "shaft_engine");
+
+        // Submit the search form by pressing Enter via the search button
+        elementService.click(locatorStrategy.XPATH, "//button[@type='submit']");
+
+        // Wait for search results to load by verifying the results container appears
+        String firstResultHref = elementService.getDomAttribute(
+                locatorStrategy.XPATH,
+                "//article[@data-testid='result'][1]//a[@data-testid='result-title-a']",
+                "href"
+        );
+
+        assertNotNull(firstResultHref, "First search result URL should not be null");
+        assertFalse(firstResultHref.isEmpty(), "First search result URL should not be empty");
+
+        // Assert the first organic result points to the official SHAFT_ENGINE GitHub repository
+        assertTrue(
+                firstResultHref.toLowerCase().contains("github.com/shafthq/shaft_engine"),
+                "First search result URL should contain 'github.com/ShaftHQ/SHAFT_ENGINE' (case-insensitive), actual: " + firstResultHref
+        );
+
+        logger.info("DuckDuckGo search scenario passed. First result URL: {}", firstResultHref);
+    }
 }
