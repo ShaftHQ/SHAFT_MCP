@@ -162,7 +162,8 @@ class EngineServiceTest {
         // Submit the search form by pressing Enter via the search button
         elementService.click(locatorStrategy.XPATH, "//button[@type='submit']");
 
-        // Wait for search results to load by verifying the results container appears
+        // Retrieve the href of the first organic result; SHAFT Engine's implicit wait handles
+        // waiting for the results container to appear before returning the attribute value.
         String firstResultHref = elementService.getDomAttribute(
                 locatorStrategy.XPATH,
                 "//article[@data-testid='result'][1]//a[@data-testid='result-title-a']",
