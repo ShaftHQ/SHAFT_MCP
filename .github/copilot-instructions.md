@@ -4,17 +4,17 @@
 
 SHAFT MCP is a **Model Context Protocol (MCP) server** that enables Claude Desktop to perform web automation tasks using the SHAFT Engine (a Selenium-based test automation framework). The project is built with:
 
-- **Language**: Java 21 (OpenJDK 21.0.2 LTS or newer)
-- **Framework**: Spring Boot 3.5.7 with Spring AI 1.0.3
+- **Language**: Java 25 (Temurin 25 LTS or newer)
+- **Framework**: Spring Boot 4.0.5 with Spring AI 1.1.4
 - **Build Tool**: Maven 3.x
-- **Testing Framework**: JUnit Jupiter
-- **Web Automation**: SHAFT Engine 9.4.20251108 (Selenium-based)
+- **Testing Framework**: JUnit Jupiter (JUnit 5) via TestNG-compatible surefire profile
+- **Web Automation**: SHAFT Engine 10.2.20260422 (Selenium-based)
 - **Distribution**: JAR file, Docker image, Maven Central
 
 ## Technology Stack
 
 - Spring Boot for application framework
-- Spring AI for MCP server implementation
+- Spring AI for MCP server implementation (STDIO and HTTP/SSE transports)
 - SHAFT Engine for browser automation (Selenium WebDriver)
 - Allure for test reporting
 - SLF4J for logging
@@ -25,12 +25,22 @@ SHAFT MCP is a **Model Context Protocol (MCP) server** that enables Claude Deskt
 ```bash
 mvn clean package -DskipTests -Dgpg.skip
 ```
-This creates the JAR file in `target/SHAFT_MCP-9.4.20251108.jar`
+This creates the JAR file in `target/SHAFT_MCP-10.2.20260422.jar`
 
-### Run Tests
+### Run Tests (requires Selenium Grid)
 ```bash
-mvn clean test
+# Pre-create the properties directory to prevent SHAFT Engine IOException
+mkdir -p src/main/resources/properties
+# Point to a running Selenium Grid
+REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub mvn clean test -Pjunit
 ```
+Tests **must** be run with the `junit` Maven profile (`-Pjunit`). The CI integration test
+workflow (`integration-test.yml`) spins up a `selenium/standalone-chrome:latest` container
+on port 4444 before running the tests.
+
+**IMPORTANT — run tests before any code merge:**
+Tests must be executed and confirmed passing before merging code changes.
+If tests fail, iterate to fix the problem and re-run. Keep iterating until all tests pass.
 
 ### Full Build with Tests
 ```bash
@@ -39,7 +49,7 @@ mvn clean install
 
 ### Run the Application Locally (for testing)
 ```bash
-java -jar target/SHAFT_MCP-9.4.20251108.jar
+java -jar target/SHAFT_MCP-10.2.20260422.jar
 ```
 
 ## Project Structure
@@ -56,13 +66,19 @@ SHAFT_MCP/
 │   │   │   ├── BrowserType.java            # Browser type enum
 │   │   │   └── locatorStrategy.java        # Element locator strategies
 │   │   └── resources/
-│   │       └── application.properties      # Spring configuration
+│   │       ├── application.properties      # STDIO transport (Claude Desktop)
+│   │       └── application-http.properties # HTTP/SSE transport (Smithery cloud)
 │   └── test/
 │       └── java/io/github/shafthq/SHAFT_MCP/
 │           ├── ShaftMcpApplicationTests.java
 │           └── EngineServiceTest.java
 ├── pom.xml                                 # Maven configuration
-├── Dockerfile                              # Docker image configuration
+├── Dockerfile                              # Docker image (downloads JAR from Maven Central)
+├── Dockerfile.smithery                     # Smithery deployment (downloads JAR from Maven Central)
+├── Dockerfile.smithery.build               # Smithery deployment (multi-stage build from source)
+├── smithery.yaml                           # Smithery.ai configuration
+├── server.json                             # MCP Registry manifest (OCI package listing)
+├── SMITHERY_DEPLOYMENT.md                  # Smithery deployment guide
 └── readme.md                               # User documentation
 ```
 
@@ -71,7 +87,7 @@ SHAFT_MCP/
 ### 1. MCP Tools (Spring AI @Tool annotations)
 - All tools are annotated with `@Tool` from `org.springframework.ai.tool.annotation.Tool`
 - Tools are organized across three service classes:
-  - **EngineService**: Driver initialization and lifecycle (`driver_initialize`, `driver_quit`, `generate_test_report`)
+  - **EngineService**: Driver initialization and lifecycle (`driver_initialize`, `driver_quit`, `generate_test_report`, `browser_get_page_source`)
   - **BrowserService**: Browser operations (`browser_navigate`, `browser_refresh`, `browser_get_current_url`, etc.)
   - **ElementService**: Element interactions (`element_click`, `element_type`, `element_get_text`, etc.)
 
@@ -80,10 +96,12 @@ SHAFT_MCP/
 - Supports Chrome, Firefox, Safari, and Edge browsers
 - Provides AI-enhanced element detection via SHAFT Engine
 - Generates Allure test reports
+- Remote Selenium Grid support via `REMOTE_DRIVER_ADDRESS` env variable
 
 ### 3. Spring AI MCP Server
-- Configured via `application.properties` with STDIO transport
-- Banner and console logging must be disabled for STDIO to work
+- STDIO transport: configured via `application.properties` (for Claude Desktop)
+- HTTP/SSE transport: configured via `application-http.properties` (for Smithery and web clients)
+- **Critical**: `spring.main.banner-mode=off` and `logging.pattern.console=` must remain empty in `application.properties` for STDIO transport to work
 - Server name: `shaft-mcp`
 
 ## Coding Standards & Best Practices
@@ -113,56 +131,118 @@ When adding new MCP tools:
 - Write unit tests for new service methods
 - Use JUnit Jupiter (JUnit 5) for test cases
 - Test classes should mirror the structure: `ServiceName` → `ServiceNameTest`
-- Run tests before committing: `mvn clean test`
+- **Always run tests before merging**: `mkdir -p src/main/resources/properties && REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub mvn clean test -Pjunit`
+- Tests run against a Selenium Grid; `src/main/resources/properties/` must pre-exist
+
+### XPath Best Practices
+When writing XPath locators for SHAFT Engine:
+- **Use parenthesized form for positional selection**: `(//article[@data-testid='result'])[1]` — this selects the globally-first matching element.
+- **Avoid bare positional predicates**: `//article[@data-testid='result'][1]` applies the `[1]` predicate relative to each parent node, which can match **all** matching elements when they have different parents (e.g., each inside its own `<li>`).
+- SHAFT throws `MultipleElementsFoundException` if a locator matches more than one element for operations like `getDomAttribute`.
 
 ## Important Configuration Files
 
 ### pom.xml
-- Contains project version (must match in Dockerfile, application.properties, readme.md)
+- Contains project version (must match in Dockerfile, Dockerfile.smithery, application.properties, application-http.properties, server.json, readme.md)
 - Defines build commands in properties:
   - `commandToPackage`: `mvn clean package "-DskipTests" "-Dgpg.skip"`
   - `commandToTest`: `mvn clean test`
 - Maven plugins for compilation, testing, and packaging
 
 ### application.properties
-- MCP server configuration
+- STDIO transport (default) — used by Claude Desktop
 - **Critical**: `spring.main.banner-mode=off` and `logging.pattern.console=` must remain empty for STDIO transport
 
+### application-http.properties
+- HTTP/SSE transport — used by Smithery and web-based MCP clients
+- Activated via `SPRING_PROFILES_ACTIVE=http`
+- Port controlled by `PORT` env variable (default: 8081)
+- SSE endpoint: `/mcp`
+
 ### Dockerfile
-- Multi-stage build for creating Docker images
+- Downloads released JAR from Maven Central (STDIO transport)
 - Published to GitHub Container Registry: `ghcr.io/shafthq/shaft-mcp`
+
+### Dockerfile.smithery
+- Downloads released JAR from Maven Central (HTTP/SSE transport)
+- Used for Smithery cloud deployment via pre-built JAR
+- Installs Google Chrome for browser automation
+
+### Dockerfile.smithery.build
+- Multi-stage build from source code (HTTP/SSE transport)
+- Used as the primary build Dockerfile referenced in `smithery.yaml`
+
+### smithery.yaml
+- Smithery.ai deployment configuration
+- References `Dockerfile.smithery.build` as the build Dockerfile
+- HTTP start command type for SSE transport
+
+### server.json
+- MCP Registry manifest
+- Must have `version` and OCI `identifier` tag matching the current project version
 
 ## Version Management
 
 When updating the version:
 1. Update `<version>` in `pom.xml`
 2. Update `spring.ai.mcp.server.version` in `application.properties`
-3. Update version references in `Dockerfile`
-4. Update version in `readme.md` installation instructions
+3. Update `spring.ai.mcp.server.version` in `application-http.properties`
+4. Update the JAR download URL in `Dockerfile`
+5. Update the JAR download URL in `Dockerfile.smithery`
+6. Update version in `readme.md` installation instructions
+7. Update `version` and OCI `identifier` in `server.json`
 
-Current version: `9.4.20251108`
+The `sync-versions.yml` CI workflow automates steps 2–7 when `pom.xml` changes.
+
+Current version: `10.2.20260422`
 
 ## Dependencies
 
 Key dependencies managed in pom.xml:
-- `spring-boot-starter` (3.5.7)
-- `spring-ai-mcp-spring-boot-starter` (1.0.3)
-- `SHAFT_ENGINE` (9.4.20251108)
-- `aspectjweaver` (1.9.25)
-- `junit-jupiter-engine` (6.0.1)
+- `spring-boot-starter-parent` (4.0.5)
+- `spring-ai-starter-mcp-server` (1.1.4 via BOM)
+- `spring-ai-starter-mcp-server-webmvc` (1.1.4 via BOM) — HTTP/SSE transport
+- `SHAFT_ENGINE` (10.2.20260422)
+- `aspectjweaver` (1.9.25.1)
+- `junit-jupiter-engine` (6.0.3)
 
 ## Files to Ignore
 
-The following should never be committed (see `.gitignore`):
+The following are auto-generated and must never be committed (already in `.gitignore`):
 - `target/` - Maven build artifacts
 - `allure-results/`, `allure-report/` - Test reports
+- `allurerc.yaml` - Allure configuration auto-generated by SHAFT Engine during tests
+- `src/main/resources/properties/` - SHAFT Engine extracted default property files
 - IDE-specific files (`.idea/`, `.vscode/`, `.settings/`, etc.)
 - `HELP.md` - Auto-generated Spring Boot help
+
+## Cloud Deployment (Smithery)
+
+SHAFT MCP is listed on [Smithery.ai](https://smithery.ai/server/@ShaftHQ/shaft-mcp) and supports zero-install cloud deployment via HTTP/SSE transport.
+
+### Deployment Flow
+1. Smithery uses `smithery.yaml` → builds via `Dockerfile.smithery.build`
+2. Container starts with `SPRING_PROFILES_ACTIVE=http` → activates `application-http.properties`
+3. Server listens on `PORT` env variable (default 8081) with SSE endpoint at `/mcp`
+4. Chrome is installed inside the container for browser automation
+
+### Local Smithery Testing
+```bash
+# Build the Docker image
+docker build -f Dockerfile.smithery.build -t shaft-mcp-http .
+
+# Run the container
+docker run -p 8081:8081 -e PORT=8081 -e SPRING_PROFILES_ACTIVE=http shaft-mcp-http
+
+# Test the SSE endpoint
+curl -N -H "Accept: text/event-stream" http://localhost:8081/mcp
+```
 
 ## Documentation
 
 ### User-Facing Documentation
 - `readme.md` - Complete setup and usage guide for end users
+- `SMITHERY_DEPLOYMENT.md` - Smithery and cloud hosting deployment guide
 - Includes installation instructions for both JAR and Docker
 - Documents all 25+ available MCP tools
 - Provides usage examples and troubleshooting
@@ -191,7 +271,7 @@ To test the MCP server locally:
 3. Use `getDriver()` to access the SHAFT WebDriver
 4. Call appropriate `driver.browser()` method
 5. Add error handling and logging
-6. Write unit tests in `BrowserServiceTest.java`
+6. Write unit tests in `EngineServiceTest.java`
 
 ### Adding a New Element Tool
 1. Add method to `ElementService.java`
@@ -204,14 +284,14 @@ To test the MCP server locally:
 ### Updating Dependencies
 1. Check for updates to Spring Boot, Spring AI, or SHAFT Engine
 2. Update versions in `pom.xml`
-3. Run `mvn clean test` to verify compatibility
+3. Run `mvn clean test -Pjunit` to verify compatibility
 4. Update readme.md if needed
 
 ## Review Criteria
 
 Pull requests should:
 - [ ] Include clear, focused changes
-- [ ] Have passing tests (`mvn clean test`)
+- [ ] Have **all tests passing** locally (`mkdir -p src/main/resources/properties && REMOTE_DRIVER_ADDRESS=http://localhost:4444/wd/hub mvn clean test -Pjunit`)
 - [ ] Build successfully (`mvn clean package -DskipTests -Dgpg.skip`)
 - [ ] Include JavaDoc for new public methods
 - [ ] Follow existing code style and patterns
@@ -221,10 +301,11 @@ Pull requests should:
 
 ## Known Constraints
 
-- This is an MCP server using STDIO transport - console output must be carefully managed
-- Browser automation requires the target browser to be installed on the host system
-- SHAFT Engine generates Allure reports which should be gitignored
-- Docker images must be built with headless browser support
+- This is an MCP server using STDIO transport — console output must be carefully managed in `application.properties`
+- Browser automation requires the target browser to be installed on the host system (or reachable via Selenium Grid)
+- SHAFT Engine generates Allure reports and `allurerc.yaml` which should be gitignored
+- Docker images must be built with headless/virtual-display browser support
+- DuckDuckGo (and similar sites) detect headless Chrome via the `--headless` flag; use the Selenium Grid (which uses Xvfb for non-headless rendering) in tests instead
 
 ## Additional Resources
 
@@ -232,3 +313,5 @@ Pull requests should:
 - Model Context Protocol Spec: https://modelcontextprotocol.io/
 - Spring AI MCP: https://docs.spring.io/spring-ai/reference/api/mcp/index.html
 - Maven Central: https://central.sonatype.com/artifact/io.github.shafthq/SHAFT_MCP
+- Smithery listing: https://smithery.ai/server/@ShaftHQ/shaft-mcp
+

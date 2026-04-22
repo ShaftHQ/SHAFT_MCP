@@ -164,9 +164,11 @@ class EngineServiceTest {
 
         // Retrieve the href of the first organic result; SHAFT Engine's implicit wait handles
         // waiting for the results container to appear before returning the attribute value.
+        // NOTE: Uses parenthesized XPath (//...)[1] to correctly select the globally-first article,
+        // rather than //...[1] which uses positional predicate relative to each parent node.
         String firstResultHref = elementService.getDomAttribute(
                 locatorStrategy.XPATH,
-                "//article[@data-testid='result'][1]//a[@data-testid='result-title-a']",
+                "(//article[@data-testid='result'])[1]//a[@data-testid='result-title-a']",
                 "href"
         );
 
