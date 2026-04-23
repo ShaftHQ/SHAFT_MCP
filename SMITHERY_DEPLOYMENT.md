@@ -14,6 +14,19 @@ The top 3 **free** cloud platforms for hosting MCP servers are:
 
 All three platforms use the **HTTP/SSE transport** mode (`SPRING_PROFILES_ACTIVE=http`) with the MCP endpoint at `/mcp`.
 
+Deployments to all three platforms are automated via the **`deploy-cloud-hosting.yml`** GitHub Actions workflow, which triggers automatically after every successful Maven CD + Docker publish pipeline run.
+
+### Required GitHub Secrets for Automated Deployment
+
+Before automated deployments can run, add these secrets in your repository's **Settings → Secrets → Actions**:
+
+| Secret | Platform | How to Obtain |
+|--------|----------|---------------|
+| `RENDER_DEPLOY_HOOK_URL` | Render.com | Dashboard → Service → Settings → **Deploy Hook** |
+| `FLY_API_TOKEN` | Fly.io | Run `fly tokens create deploy -a shaft-mcp` |
+
+Smithery.ai requires no secret — it auto-deploys from the connected GitHub repository.
+
 ---
 
 ## Smithery Deployment
@@ -230,7 +243,7 @@ curl -N -H "Accept: text/event-stream" http://localhost:8080/mcp
 ### Troubleshooting Fly.io
 
 - **Machine won't start**: Run `fly logs` and look for OOM errors. The JVM tuning in `fly.toml` should keep heap under 384 MB.
-- **Slow wake after suspend**: `auto_stop_machines = "suspend"` is set in `fly.toml`. The first request after a long idle period may take 2–5 s. Set `min_machines_running = 1` in `fly.toml` to disable suspend.
+- **Slow wake after suspend**: `auto_stop_machines = "suspend"` is set in `fly.toml`. The first request after a long idle period may take 2–5 s. To keep the machine always running, change `min_machines_running` from `0` to `1` in `fly.toml` (note: this will consume more of your $5/month credit).
 - **Credit card declined**: Fly.io requires a valid card even for free-tier usage. Use Render.com if you need a no-card option.
 
 ---
