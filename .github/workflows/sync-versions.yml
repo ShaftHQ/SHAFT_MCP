@@ -91,6 +91,20 @@ jobs:
           # Update the pre-built JAR URL in the Smithery Dockerfile
           sed -i "s|SHAFT_MCP/$CURRENT_PROJECT_VERSION/SHAFT_MCP-$CURRENT_PROJECT_VERSION.jar|SHAFT_MCP/$SHAFT_ENGINE_VERSION/SHAFT_MCP-$SHAFT_ENGINE_VERSION.jar|g" Dockerfile.smithery
           echo "Updated Dockerfile.smithery version to $SHAFT_ENGINE_VERSION"
+
+      - name: Update version in Dockerfile.render
+        if: steps.check_sync.outputs.sync_needed == 'true'
+        run: |
+          # Update the pre-built JAR URL in the Render Dockerfile
+          sed -i "s|SHAFT_MCP/$CURRENT_PROJECT_VERSION/SHAFT_MCP-$CURRENT_PROJECT_VERSION.jar|SHAFT_MCP/$SHAFT_ENGINE_VERSION/SHAFT_MCP-$SHAFT_ENGINE_VERSION.jar|g" Dockerfile.render
+          echo "Updated Dockerfile.render version to $SHAFT_ENGINE_VERSION"
+
+      - name: Update version in Dockerfile.fly
+        if: steps.check_sync.outputs.sync_needed == 'true'
+        run: |
+          # Update the pre-built JAR URL in the Fly.io Dockerfile
+          sed -i "s|SHAFT_MCP/$CURRENT_PROJECT_VERSION/SHAFT_MCP-$CURRENT_PROJECT_VERSION.jar|SHAFT_MCP/$SHAFT_ENGINE_VERSION/SHAFT_MCP-$SHAFT_ENGINE_VERSION.jar|g" Dockerfile.fly
+          echo "Updated Dockerfile.fly version to $SHAFT_ENGINE_VERSION"
           
       - name: Update version references in readme.md
         if: steps.check_sync.outputs.sync_needed == 'true'
@@ -105,9 +119,9 @@ jobs:
           echo "=== Changes made ==="
           git diff --name-only
           echo "=== Version verification ==="
-          grep -n "$SHAFT_ENGINE_VERSION" pom.xml Dockerfile Dockerfile.smithery src/main/resources/application.properties src/main/resources/application-http.properties readme.md || true
+          grep -n "$SHAFT_ENGINE_VERSION" pom.xml Dockerfile Dockerfile.smithery Dockerfile.render Dockerfile.fly src/main/resources/application.properties src/main/resources/application-http.properties readme.md || true
           echo "=== Checking for old version references ==="
-          grep -n "$CURRENT_PROJECT_VERSION" pom.xml Dockerfile Dockerfile.smithery src/main/resources/application.properties src/main/resources/application-http.properties readme.md || echo "No old version references found (expected)"
+          grep -n "$CURRENT_PROJECT_VERSION" pom.xml Dockerfile Dockerfile.smithery Dockerfile.render Dockerfile.fly src/main/resources/application.properties src/main/resources/application-http.properties readme.md || echo "No old version references found (expected)"
           
       - name: Create PR with version sync changes
         if: steps.check_sync.outputs.sync_needed == 'true'
@@ -121,7 +135,7 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           
           # Stage changes
-          git add pom.xml Dockerfile Dockerfile.smithery src/main/resources/application.properties src/main/resources/application-http.properties readme.md
+          git add pom.xml Dockerfile Dockerfile.smithery Dockerfile.render Dockerfile.fly src/main/resources/application.properties src/main/resources/application-http.properties readme.md
           
           # Check if there are changes to commit
           if git diff --staged --quiet; then
@@ -133,6 +147,8 @@ jobs:
             - Updated project version in pom.xml
             - Updated Dockerfile Maven Central URL
             - Updated Dockerfile.smithery Maven Central URL
+            - Updated Dockerfile.render Maven Central URL
+            - Updated Dockerfile.fly Maven Central URL
             - Updated application.properties MCP server version
             - Updated application-http.properties MCP server version
             - Updated readme.md version references
@@ -151,7 +167,11 @@ jobs:
             ### Changes
             - ✅ Updated project version in \`pom.xml\` from \`$CURRENT_PROJECT_VERSION\` to \`$SHAFT_ENGINE_VERSION\`
             - ✅ Updated Dockerfile Maven Central URL
+            - ✅ Updated \`Dockerfile.smithery\` Maven Central URL
+            - ✅ Updated \`Dockerfile.render\` Maven Central URL
+            - ✅ Updated \`Dockerfile.fly\` Maven Central URL
             - ✅ Updated \`application.properties\` MCP server version
+            - ✅ Updated \`application-http.properties\` MCP server version
             - ✅ Updated \`readme.md\` version references
 
             ### Review
@@ -174,7 +194,7 @@ jobs:
             echo "✅ **Version Sync PR Created**" >> $GITHUB_STEP_SUMMARY
             echo "- Project version will be updated from \`$CURRENT_PROJECT_VERSION\` to \`$SHAFT_ENGINE_VERSION\`" >> $GITHUB_STEP_SUMMARY
             echo "- A pull request has been created for review and merge" >> $GITHUB_STEP_SUMMARY
-            echo "- Updated files: pom.xml, Dockerfile, Dockerfile.smithery, application.properties, application-http.properties, readme.md" >> $GITHUB_STEP_SUMMARY
+            echo "- Updated files: pom.xml, Dockerfile, Dockerfile.smithery, Dockerfile.render, Dockerfile.fly, application.properties, application-http.properties, readme.md" >> $GITHUB_STEP_SUMMARY
           else
             echo "ℹ️ **No Sync Needed**" >> $GITHUB_STEP_SUMMARY
             echo "- Project version (\`$CURRENT_PROJECT_VERSION\`) already matches SHAFT Engine version" >> $GITHUB_STEP_SUMMARY

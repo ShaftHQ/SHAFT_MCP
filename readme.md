@@ -78,7 +78,9 @@ SHAFT MCP is available through multiple channels:
 - **GitHub MCP Registry**: Officially listed in the [Model Context Protocol Registry](https://registry.modelcontextprotocol.io/) as `io.github.ShaftHQ/shaft-mcp`
 - **Maven Central**: Available as a Java JAR at `io.github.shafthq:SHAFT_MCP`
 - **GitHub Container Registry**: Docker images available at `ghcr.io/shafthq/shaft-mcp`
-- **Smithery.ai**: Deploy via Smithery for hosted MCP server (see [SMITHERY_DEPLOYMENT.md](SMITHERY_DEPLOYMENT.md))
+- **Smithery.ai**: Deploy via Smithery for hosted MCP server (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#smithery-deployment))
+- **Render.com**: One-click free cloud deployment — no credit card required (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#rendercom-deployment))
+- **Fly.io**: Global edge deployment that suspends when idle by default, with $5/month free credit (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#flyio-deployment))
 
 ## Deployment Options
 
@@ -87,13 +89,14 @@ SHAFT MCP supports two deployment modes:
 ### 1. Local Deployment (Claude Desktop)
 Uses **STDIO transport** for direct integration with Claude Desktop application. See setup instructions below.
 
-### 2. Remote Deployment (Smithery & Web)
-Uses **HTTP/SSE transport** for web-based access and remote hosting platforms like Smithery.ai, Railway, Render, etc.
+### 2. Remote Deployment (Smithery, Render, Fly.io & Web)
+Uses **HTTP/SSE transport** for web-based access and remote hosting platforms like Smithery.ai, Render.com, Fly.io, and more.
 
-📖 **For Smithery and remote deployment instructions**, see the comprehensive [Smithery Deployment Guide](SMITHERY_DEPLOYMENT.md) which includes:
+📖 **For all remote deployment instructions**, see the comprehensive [Deployment Guide](SMITHERY_DEPLOYMENT.md) which includes:
 - Step-by-step Smithery deployment
+- Render.com free-tier deployment (no credit card required)
+- Fly.io always-on global edge deployment
 - Local testing with Docker
-- 10+ alternative hosting platforms comparison
 - Configuration options and best practices
 
 ## Prerequisites

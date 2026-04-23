@@ -1,8 +1,33 @@
-# SHAFT MCP - Smithery Deployment Guide
+# SHAFT MCP - Cloud Deployment Guide
 
 ## Overview
 
-This guide explains how to deploy SHAFT MCP to Smithery.ai and other hosting platforms. SHAFT MCP supports both STDIO transport (for Claude Desktop) and HTTP/SSE transport (for Smithery and other web-based deployments).
+This guide explains how to deploy SHAFT MCP to free cloud hosting platforms. SHAFT MCP supports both STDIO transport (for Claude Desktop) and HTTP/SSE transport (for Smithery, Render.com, Fly.io, and other web-based deployments).
+
+The top 3 **free** cloud platforms for hosting MCP servers are:
+
+| Platform | Free Tier | Always-On | Credit Card | MCP-Specific | Best For |
+|----------|-----------|-----------|-------------|--------------|----------|
+| [**Smithery.ai**](#smithery-deployment) | Yes | Yes | No | ✅ Yes | MCP-native hosting |
+| [**Render.com**](#rendercom-deployment) | Yes (512 MB) | No (sleeps) | No | No | Simple Docker deploys |
+| [**Fly.io**](#flyio-deployment) | $5/mo credit | Yes | Yes | No | Always-on global edge |
+
+All three platforms use the **HTTP/SSE transport** mode (`SPRING_PROFILES_ACTIVE=http`) with the MCP endpoint at `/mcp`.
+
+Deployments to all three platforms are automated via the **`deploy-cloud-hosting.yml`** GitHub Actions workflow, which triggers automatically after every successful Maven CD + Docker publish pipeline run.
+
+### Required GitHub Secrets for Automated Deployment
+
+Before automated deployments can run, add these secrets in your repository's **Settings → Secrets → Actions**:
+
+| Secret | Platform | How to Obtain |
+|--------|----------|---------------|
+| `RENDER_DEPLOY_HOOK_URL` | Render.com | Dashboard → Service → Settings → **Deploy Hook** |
+| `FLY_API_TOKEN` | Fly.io | Run `fly tokens create deploy -a shaft-mcp` |
+
+Smithery.ai requires no secret — it auto-deploys from the connected GitHub repository.
+
+---
 
 ## Smithery Deployment
 
@@ -65,9 +90,167 @@ The `smithery.yaml` supports the following configuration:
 browserType: "CHROME"  # Options: CHROME, FIREFOX, SAFARI, EDGE
 ```
 
+---
+
+## Render.com Deployment
+
+[Render.com](https://render.com) offers a **completely free** Docker web service tier — no credit card required. It's the easiest way to get SHAFT MCP accessible at a public URL.
+
+### Free Tier Specs
+
+| Resource | Limit | Impact |
+|----------|-------|--------|
+| RAM | 512 MB | Tight for Java + Chrome; JVM tuned |
+| CPU | 0.1 shared | Slower but functional |
+| Sleep | After 15 min idle | ~30 s cold start on first request |
+| Deploy URL | `https://your-app.onrender.com` | Auto-provisioned |
+
+### Quick Deploy (via render.yaml)
+
+This repository includes a `render.yaml` that Render auto-detects:
+
+1. **Fork or connect** your copy of `ShaftHQ/SHAFT_MCP` to your GitHub account
+2. Go to [render.com/dashboard](https://render.com/dashboard) → **New +** → **Web Service**
+3. Connect your GitHub repository
+4. Render will detect `render.yaml` and pre-fill all settings — just click **Create Web Service**
+5. Wait 3–5 minutes for the build and first deploy
+
+### Manual Configuration
+
+If you prefer to configure manually instead of using `render.yaml`:
+
+| Setting | Value |
+|---------|-------|
+| **Environment** | Docker |
+| **Dockerfile Path** | `Dockerfile.render` |
+| **Plan** | Free |
+| **SPRING_PROFILES_ACTIVE** | `http` |
+
+### Testing Your Render Deployment
+
+```bash
+# Replace with your actual Render URL
+RENDER_URL=https://shaft-mcp.onrender.com
+
+# Test the MCP SSE endpoint
+curl -N -H "Accept: text/event-stream" $RENDER_URL/mcp
+```
+
+### Preventing Cold Starts
+
+The free tier sleeps after 15 minutes of inactivity. To keep the server warm, ping it periodically:
+
+```bash
+# Bounded keep-alive for the SSE endpoint using cron or an external uptime service
+curl -s --max-time 5 -H "Accept: text/event-stream" "$RENDER_URL/mcp" -o /dev/null
+```
+
+### Local Testing (Render Docker)
+
+```bash
+# Build and run locally simulating Render's 512 MB limit
+docker build -f Dockerfile.render -t shaft-mcp-render .
+docker run --memory=512m -p 8081:8081 -e PORT=8081 shaft-mcp-render
+
+# Test the endpoint
+curl -N -H "Accept: text/event-stream" http://localhost:8081/mcp
+```
+
+### Troubleshooting Render
+
+- **Out-of-memory crash**: Chrome exhausted the 512 MB budget. Set `REMOTE_DRIVER_ADDRESS` to an external Selenium Grid and avoid launching Chrome inside the container.
+- **Slow first response**: Normal cold start — Render spins down free services after 15 minutes of inactivity.
+
+---
+
+## Fly.io Deployment
+
+[Fly.io](https://fly.io) offers a **global edge** platform. A $5/month free credit is included per account (credit card required). This covers a 512 MB shared VM for light usage. By default, machines suspend after idle — the first request after a long idle period may take 2–5 s.
+
+### Free Tier Specs
+
+| Resource | Limit | Impact |
+|----------|-------|--------|
+| RAM | 512 MB (single VM) | Tuned JVM + Chrome fits |
+| CPU | 1 shared vCPU | Adequate for MCP tasks |
+| Sleep | Suspends when idle (`min_machines_running = 0`) | Cold start on first request after idle |
+| Credit | $5/month included | Covers small VM |
+| Deploy URL | `https://shaft-mcp.fly.dev` | Auto-provisioned |
+
+### Prerequisites
+
+```bash
+# Install Fly CLI
+curl -L https://fly.io/install.sh | sh
+
+# Authenticate
+fly auth login
+```
+
+### First Deployment
+
+```bash
+git clone https://github.com/ShaftHQ/SHAFT_MCP.git
+cd SHAFT_MCP
+
+# Creates the Fly app using fly.toml (already in this repo)
+fly launch --copy-config --yes
+
+# Fly builds the image, deploys, and gives you a URL
+```
+
+### Subsequent Deployments
+
+```bash
+fly deploy
+```
+
+### Verifying the Deployment
+
+```bash
+# Check machine status
+fly status
+
+# Stream logs
+fly logs
+
+# Test the MCP SSE endpoint
+FLY_URL=https://shaft-mcp.fly.dev
+curl -N -H "Accept: text/event-stream" $FLY_URL/mcp
+```
+
+### Scaling and Regions
+
+```bash
+# Add a second region for lower latency
+fly regions add lhr   # London
+
+# Scale to two machines
+fly scale count 2
+```
+
+### Local Testing (Fly Docker)
+
+```bash
+# Build and run locally simulating Fly.io's 512 MB limit
+docker build -f Dockerfile.fly -t shaft-mcp-fly .
+docker run --memory=512m -p 8080:8080 -e PORT=8080 shaft-mcp-fly
+
+# Test the endpoint
+curl -N -H "Accept: text/event-stream" http://localhost:8080/mcp
+```
+
+### Troubleshooting Fly.io
+
+- **Machine won't start**: Run `fly logs` and look for OOM errors. The JVM tuning in `fly.toml` should keep heap under 384 MB.
+- **Slow wake after suspend**: `auto_stop_machines = "suspend"` is set in `fly.toml`. The first request after a long idle period may take 2–5 s. To keep the machine always running, change `min_machines_running` from `0` to `1` in `fly.toml` (note: this will consume more of your $5/month credit).
+- **Credit card declined**: Fly.io requires a valid card even for free-tier usage. Use Render.com if you need a no-card option.
+
+---
+
 ## Alternative MCP Server Hosting Platforms
 
-While Smithery provides excellent integration for MCP servers, you have several other hosting options:
+While Smithery, Render, and Fly.io are recommended, you have several other hosting options:
 
 ### 1. **Cloudflare Workers**
 - **Best For**: Edge-hosted, globally distributed MCP servers
