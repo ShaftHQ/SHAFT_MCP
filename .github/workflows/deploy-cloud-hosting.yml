@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -47,22 +49,36 @@ jobs:
           echo "Deploying version: $VERSION"
 
       - name: Trigger Render.com deployment
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_TRIGGERED=false" >> $GITHUB_ENV
+            echo "⚠️ Render.com deployment skipped because RENDER_DEPLOY_HOOK_URL is not configured."
+            exit 0
+          fi
+
+          curl -X POST "$RENDER_DEPLOY_HOOK_URL" \
             --fail \
             --show-error
+          echo "RENDER_DEPLOY_TRIGGERED=true" >> $GITHUB_ENV
           echo "✅ Render.com deployment triggered for version $VERSION"
 
       - name: Write job summary
         run: |
           echo "## 🚀 Render.com Deployment" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: Deployment triggered successfully" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dockerfile**: \`Dockerfile.render\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **MCP Endpoint**: \`https://shaft-mcp.onrender.com/mcp\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> ⚠️ Render free tier services sleep after 15 minutes of inactivity." >> $GITHUB_STEP_SUMMARY
-          echo "> The first request after sleep may take ~30 s due to cold start." >> $GITHUB_STEP_SUMMARY
+          if [ "$RENDER_DEPLOY_TRIGGERED" = "true" ]; then
+            echo "- **Status**: Deployment triggered successfully" >> $GITHUB_STEP_SUMMARY
+            echo "- **Dockerfile**: \`Dockerfile.render\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **MCP Endpoint**: \`https://shaft-mcp.onrender.com/mcp\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> ⚠️ Render free tier services sleep after 15 minutes of inactivity." >> $GITHUB_STEP_SUMMARY
+            echo "> The first request after sleep may take ~30 s due to cold start." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ⚠️ Deployment skipped — \`RENDER_DEPLOY_HOOK_URL\` secret is not configured." >> $GITHUB_STEP_SUMMARY
+            echo "- **Setup**: Add the Deploy Hook URL from Render dashboard → Service → Settings → Deploy Hook." >> $GITHUB_STEP_SUMMARY
+          fi
 
   # ---------------------------------------------------------------------------
   # Fly.io deployment
@@ -76,6 +92,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -91,22 +109,35 @@ jobs:
           echo "Deploying version: $VERSION"
 
       - name: Set up Fly CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
+        uses: superfly/flyctl-actions/setup-flyctl@1.6
 
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only --config fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "FLY_DEPLOY_TRIGGERED=false" >> $GITHUB_ENV
+            echo "⚠️ Fly.io deployment skipped because FLY_API_TOKEN is not configured."
+            exit 0
+          fi
+          flyctl deploy --remote-only --config fly.toml
+          echo "FLY_DEPLOY_TRIGGERED=true" >> $GITHUB_ENV
+          echo "✅ Fly.io deployment complete for version $VERSION"
 
       - name: Write job summary
         run: |
           echo "## 🚀 Fly.io Deployment" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dockerfile**: \`Dockerfile.fly\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **MCP Endpoint**: \`https://shaft-mcp.fly.dev/mcp\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> Fly.io is always-on. No cold starts." >> $GITHUB_STEP_SUMMARY
+          if [ "$FLY_DEPLOY_TRIGGERED" = "true" ]; then
+            echo "- **Status**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "- **Dockerfile**: \`Dockerfile.fly\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **MCP Endpoint**: \`https://shaft-mcp.fly.dev/mcp\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> Fly.io may cold start after idle because machines are allowed to suspend." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ⚠️ Deployment skipped — \`FLY_API_TOKEN\` secret is not configured." >> $GITHUB_STEP_SUMMARY
+            echo "- **Setup**: Run \`fly tokens create deploy -a shaft-mcp\` and add the token as a repository secret." >> $GITHUB_STEP_SUMMARY
+          fi
 
   # ---------------------------------------------------------------------------
   # Smithery.ai — auto-deploys via GitHub webhook (no API call needed)
@@ -120,6 +151,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5

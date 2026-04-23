@@ -80,7 +80,7 @@ SHAFT MCP is available through multiple channels:
 - **GitHub Container Registry**: Docker images available at `ghcr.io/shafthq/shaft-mcp`
 - **Smithery.ai**: Deploy via Smithery for hosted MCP server (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#smithery-deployment))
 - **Render.com**: One-click free cloud deployment — no credit card required (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#rendercom-deployment))
-- **Fly.io**: Always-on global edge deployment with $5/month free credit (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#flyio-deployment))
+- **Fly.io**: Global edge deployment that suspends when idle by default, with $5/month free credit (see [Deployment Guide](SMITHERY_DEPLOYMENT.md#flyio-deployment))
 
 ## Deployment Options
 

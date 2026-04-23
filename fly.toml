@@ -10,7 +10,6 @@ primary_region = "iad"
 [env]
   SPRING_PROFILES_ACTIVE = "http"
   PORT = "8080"
-  JAVA_TOOL_OPTIONS = "-XX:+UseSerialGC -Xms128m -Xmx384m -XX:MaxMetaspaceSize=64m -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
 [http_service]
   internal_port = 8080

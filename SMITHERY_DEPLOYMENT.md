@@ -141,8 +141,8 @@ curl -N -H "Accept: text/event-stream" $RENDER_URL/mcp
 The free tier sleeps after 15 minutes of inactivity. To keep the server warm, ping it periodically:
 
 ```bash
-# Simple keep-alive using cron or an external uptime service
-curl -s $RENDER_URL/mcp -o /dev/null
+# Bounded keep-alive for the SSE endpoint using cron or an external uptime service
+curl -s --max-time 5 -H "Accept: text/event-stream" "$RENDER_URL/mcp" -o /dev/null
 ```
 
 ### Local Testing (Render Docker)
@@ -165,7 +165,7 @@ curl -N -H "Accept: text/event-stream" http://localhost:8081/mcp
 
 ## Fly.io Deployment
 
-[Fly.io](https://fly.io) offers an **always-on** global edge platform. A $5/month free credit is included per account (credit card required). This covers a 512 MB shared VM indefinitely for light usage.
+[Fly.io](https://fly.io) offers a **global edge** platform. A $5/month free credit is included per account (credit card required). This covers a 512 MB shared VM for light usage. By default, machines suspend after idle — the first request after a long idle period may take 2–5 s.
 
 ### Free Tier Specs
 
@@ -173,8 +173,8 @@ curl -N -H "Accept: text/event-stream" http://localhost:8081/mcp
 |----------|-------|--------|
 | RAM | 512 MB (single VM) | Tuned JVM + Chrome fits |
 | CPU | 1 shared vCPU | Adequate for MCP tasks |
-| Sleep | Never — always-on | No cold starts |
-| Credit | $5/month included | Covers small always-on VM |
+| Sleep | Suspends when idle (`min_machines_running = 0`) | Cold start on first request after idle |
+| Credit | $5/month included | Covers small VM |
 | Deploy URL | `https://shaft-mcp.fly.dev` | Auto-provisioned |
 
 ### Prerequisites

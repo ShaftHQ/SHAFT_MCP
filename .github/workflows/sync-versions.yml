@@ -171,6 +171,7 @@ jobs:
             - ✅ Updated \`Dockerfile.render\` Maven Central URL
             - ✅ Updated \`Dockerfile.fly\` Maven Central URL
             - ✅ Updated \`application.properties\` MCP server version
+            - ✅ Updated \`application-http.properties\` MCP server version
             - ✅ Updated \`readme.md\` version references
 
             ### Review

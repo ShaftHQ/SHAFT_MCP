@@ -12,5 +12,3 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: http
-      - key: JAVA_TOOL_OPTIONS
-        value: -XX:+UseSerialGC -Xms128m -Xmx384m -XX:MaxMetaspaceSize=64m -XX:+TieredCompilation -XX:TieredStopAtLevel=1
