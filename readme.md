@@ -1,3 +1,13 @@
+> [!IMPORTANT]
+> This repository is historical and has moved to
+> [`ShaftHQ/SHAFT_ENGINE`](https://github.com/ShaftHQ/SHAFT_ENGINE/tree/main/shaft-mcp).
+> Use the maintained [SHAFT MCP guide](https://github.com/ShaftHQ/SHAFT_ENGINE/blob/main/docs/SHAFT_MCP.md),
+> [SHAFT Pilot guide](https://github.com/ShaftHQ/SHAFT_ENGINE/blob/main/docs/SHAFT_PILOT.md),
+> and [usage examples](https://github.com/ShaftHQ/SHAFT_ENGINE/tree/main/docs/examples/shaft-pilot).
+> The current release is
+> [`10.2.20260612`](https://github.com/ShaftHQ/SHAFT_ENGINE/releases/tag/10.2.20260612).
+> Existing issues and releases remain available here as a read-only historical record.
+
 <h1>
 <picture>
   <!-- User prefers light mode: -->
